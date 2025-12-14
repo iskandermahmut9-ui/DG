@@ -8,14 +8,22 @@
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; cursor: none; }
-html { scroll-behavior: smooth; }
+
+html { 
+    scroll-behavior: smooth; 
+    overflow-x: hidden; /* Запрещаем горизонтальный скролл на уровне HTML */
+    width: 100%;
+}
+
 body { 
     background-color: var(--bg-color); 
     color: var(--text-color); 
     font-family: 'Montserrat', sans-serif; 
-    overflow-x: hidden;
+    overflow-x: hidden; /* Двойная защита от скролла вправо */
     width: 100%;
+    position: relative;
 }
+
 a { text-decoration: none; color: inherit; transition: 0.3s; }
 ul { list-style: none; }
 
@@ -31,6 +39,8 @@ ul { list-style: none; }
 nav {
     position: fixed; top: 0; left: 0; width: 100%; display: flex; justify-content: space-between; align-items: flex-start;
     padding: 30px 5%; z-index: 1000; background: transparent; pointer-events: none;
+    /* Гарантируем, что меню не вылезет за экран */
+    max-width: 100vw;
 }
 .logo-container, .nav-links { pointer-events: auto; }
 .logo-container img { height: 50px; width: auto; filter: drop-shadow(0 0 5px rgba(0, 198, 255, 0.3)); transition: 0.3s; display: block; }
@@ -47,7 +57,17 @@ nav {
 .nav-link:hover .nav-image-icon { filter: grayscale(0%); }
 
 /* --- HERO --- */
-.hero { height: 100vh; display: flex; flex-direction: column; justify-content: center; padding: 0 5%; position: relative; overflow: hidden; }
+.hero { 
+    height: 100vh; 
+    display: flex; 
+    flex-direction: column; 
+    justify-content: center; 
+    padding: 0 5%; 
+    position: relative; 
+    overflow: hidden; /* ВАЖНО: Обрезает всё, что торчит (например фото) */
+    width: 100%;
+}
+
 .hero-photo {
     position: absolute; bottom: 0; right: 5%; height: 90vh; width: auto; z-index: 1; pointer-events: none; opacity: 0.9;
     filter: grayscale(20%) contrast(110%) drop-shadow(0 0 30px rgba(0, 198, 255, 0.1));
@@ -65,7 +85,8 @@ nav {
 /* --- MARQUEE --- */
 .marquee-container {
     padding: 40px 0; border-top: 1px solid rgba(255,255,255,0.1); border-bottom: 1px solid rgba(255,255,255,0.1);
-    overflow: hidden; white-space: nowrap; background: #02080f; position: relative; z-index: 5; width: 100%; margin: 0;
+    overflow: hidden; white-space: nowrap; background: #02080f; position: relative; z-index: 5; 
+    width: 100%; margin: 0; max-width: 100vw;
 }
 .marquee-content { display: inline-block; animation: marquee 20s linear infinite; }
 .marquee-item { font-size: 3rem; font-weight: 900; text-transform: uppercase; margin-right: 60px; color: rgba(255,255,255,0.05); transition: 0.3s; }
@@ -127,30 +148,34 @@ footer { padding: 100px 5%; text-align: center; border-top: 1px solid rgba(255,2
 .copyright { font-size: 0.8rem; color: #444; line-height: 1.6; }
 
 /* ========================================= */
-/* МОБИЛЬНАЯ ВЕРСИЯ */
+/* МОБИЛЬНАЯ ВЕРСИЯ (ИСПРАВЛЕНИЯ) */
 /* ========================================= */
 @media (max-width: 768px) {
     * { cursor: auto !important; } .cursor { display: none; }
     
-    nav { padding: 20px 3%; }
+    /* Исправляем меню и ширину */
+    nav { padding: 20px 4%; width: 100%; box-sizing: border-box; }
     .nav-links { gap: 10px; }
     .nav-link { font-size: 0.7rem; padding: 4px 8px; }
 
-    /* ФОТО НА МОБИЛЬНОМ: Видно, НЕ прозрачно, на заднем плане */
+    /* Исправляем ФОТО (поднято вверх) */
     .hero-photo { 
         display: block;
-        height: 60vh;
-        right: -20%;
-        bottom: 0;
-        opacity: 1; /* Непрозрачное */
-        z-index: 0; 
-        filter: drop-shadow(0 0 20px rgba(0, 198, 255, 0.4)); /* Свечение */
+        height: 50vh;          /* Уменьшили высоту, чтобы не занимало весь экран */
+        top: 12%;              /* Прижимаем к ВЕРХУ, а не к низу */
+        bottom: auto;          /* Отключаем привязку к низу */
+        right: -10%;           /* Сдвигаем вправо */
+        opacity: 1;            /* Не прозрачное */
+        z-index: 0;            /* На заднем плане */
+        filter: drop-shadow(0 0 20px rgba(0, 198, 255, 0.4));
     } 
+    /* Текст должен быть поверх фото */
     .hero h1 { 
-        font-size: 11vw; 
+        font-size: 12vw;      /* Чуть меньше шрифт, чтобы не резало */
         position: relative; 
         z-index: 10; 
-        text-shadow: 0 0 20px rgba(0,0,0,0.8); /* Тень тексту для читаемости */
+        margin-top: 20vh;     /* Сдвигаем текст чуть вниз, чтобы не был на лбу */
+        text-shadow: 0 0 30px rgba(0,0,0,0.9); /* Тень чтобы читалось на фоне фото */
     }
     
     .about-container { flex-direction: column; align-items: center; gap: 30px; }

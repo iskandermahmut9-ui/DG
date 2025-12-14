@@ -13,10 +13,9 @@ body {
     background-color: var(--bg-color); 
     color: var(--text-color); 
     font-family: 'Montserrat', sans-serif; 
-    overflow-x: hidden; /* Скрываем горизонтальную прокрутку */
+    overflow-x: hidden;
     width: 100%;
 }
-
 a { text-decoration: none; color: inherit; transition: 0.3s; }
 ul { list-style: none; }
 
@@ -44,12 +43,7 @@ nav {
     display: flex; align-items: center; justify-content: flex-end;
 }
 .nav-link:hover { color: var(--accent-blue); border-color: var(--accent-blue); transform: translateX(-5px); }
-
-/* Иконки в меню */
-.nav-image-icon {
-    height: 18px; width: auto; object-fit: contain;
-    filter: grayscale(100%) brightness(200%); transition: 0.3s;
-}
+.nav-image-icon { height: 18px; width: auto; object-fit: contain; filter: grayscale(100%) brightness(200%); transition: 0.3s; }
 .nav-link:hover .nav-image-icon { filter: grayscale(0%); }
 
 /* --- HERO --- */
@@ -63,60 +57,38 @@ nav {
 
 .hero h1 {
     font-size: 9vw; line-height: 0.9; font-weight: 900; text-transform: uppercase; color: transparent;
-    -webkit-text-stroke: 1px rgba(255,255,255,0.3); position: relative; z-index: 10; transition: 0.5s;
-    /* Чтобы длинное слово не ломало верстку */
-    white-space: nowrap; 
+    -webkit-text-stroke: 1px rgba(255,255,255,0.3); position: relative; z-index: 10; transition: 0.5s; white-space: nowrap; 
 }
 .hero h1:hover { -webkit-text-stroke: 2px var(--accent-blue); color: rgba(0, 198, 255, 0.05); }
 .hero-subtitle { margin-top: 30px; font-size: 1.2rem; color: var(--accent-orange); letter-spacing: 4px; text-transform: uppercase; font-weight: 500; z-index: 10; }
 
-/* --- MARQUEE (БЕГУЩАЯ СТРОКА) --- */
+/* --- MARQUEE --- */
 .marquee-container {
-    padding: 40px 0; 
-    border-top: 1px solid rgba(255,255,255,0.1); 
-    border-bottom: 1px solid rgba(255,255,255,0.1);
-    overflow: hidden; 
-    white-space: nowrap; 
-    background: #02080f; 
-    position: relative; 
-    z-index: 5;
-    /* Исправление для мобильных - полная ширина */
-    width: 100%;
-    margin: 0;
+    padding: 40px 0; border-top: 1px solid rgba(255,255,255,0.1); border-bottom: 1px solid rgba(255,255,255,0.1);
+    overflow: hidden; white-space: nowrap; background: #02080f; position: relative; z-index: 5; width: 100%; margin: 0;
 }
 .marquee-content { display: inline-block; animation: marquee 20s linear infinite; }
 .marquee-item { font-size: 3rem; font-weight: 900; text-transform: uppercase; margin-right: 60px; color: rgba(255,255,255,0.05); transition: 0.3s; }
 .marquee-container:hover .marquee-item { color: var(--accent-blue); text-shadow: 0 0 10px rgba(0, 198, 255, 0.5); }
 @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
 
-/* --- БЛОК ОБО МНЕ --- */
+/* --- ABOUT BLOCK --- */
 .about-block {
-    padding: 100px 5%; 
-    background: radial-gradient(circle at left, rgba(0, 198, 255, 0.03), transparent 50%);
+    padding: 100px 5%; background: radial-gradient(circle at left, rgba(0, 198, 255, 0.03), transparent 50%);
     border-bottom: 1px solid rgba(255,255,255,0.05); position: relative; z-index: 5; scroll-margin-top: 50px;
 }
-.about-container { 
-    display: flex; 
-    align-items: center; 
-    justify-content: space-between;
-    gap: 60px; 
-    margin-top: 40px; 
-}
+.about-container { display: flex; align-items: center; justify-content: space-between; gap: 60px; margin-top: 40px; }
 .about-photo-frame {
-    flex: 0 0 35%; width: 35%; min-width: 300px; height: auto;
-    background: transparent; border: none; box-shadow: none; overflow: visible;
+    flex: 0 0 35%; width: 35%; min-width: 300px; height: auto; background: transparent; border: none; box-shadow: none; overflow: visible;
 }
-.about-img-real { 
-    width: 100%; height: auto; object-fit: contain; 
-    filter: drop-shadow(0 0 15px rgba(0, 198, 255, 0.3)); transition: 0.5s; 
-}
+.about-img-real { width: 100%; height: auto; object-fit: contain; filter: drop-shadow(0 0 15px rgba(0, 198, 255, 0.3)); transition: 0.5s; }
 .about-photo-frame:hover .about-img-real { filter: drop-shadow(0 0 30px rgba(0, 198, 255, 0.6)); transform: scale(1.03); }
 .about-content { flex: 1; }
 .about-title { font-size: 3rem; font-weight: 900; color: #fff; text-transform: uppercase; margin-bottom: 30px;}
 .about-text { font-size: 1.1rem; line-height: 1.8; color: #bbb; }
 .about-highlight { color: var(--accent-blue); font-weight: bold; }
 
-/* --- СПИСОК ПРОЕКТОВ --- */
+/* --- ПРОЕКТЫ --- */
 .work-section { padding: 100px 5%; position: relative; z-index: 5; background: var(--bg-color); }
 .section-header { font-size: 0.9rem; text-transform: uppercase; color: #777; margin-bottom: 50px; display: block; letter-spacing: 2px; }
 .project-list { display: flex; flex-direction: column; }
@@ -132,16 +104,11 @@ nav {
 .project-cat { font-size: 1rem; color: #777; font-style: italic; }
 
 /* --- ВТОРАЯ СТРАНИЦА --- */
-.projects-main-header {
-    font-size: 4rem; font-weight: 900; text-transform: uppercase; color: var(--accent-blue); 
-    padding: 150px 5% 50px; border-bottom: 1px solid rgba(255,255,255,0.05);
-}
+.projects-main-header { font-size: 4rem; font-weight: 900; text-transform: uppercase; color: var(--accent-blue); padding: 150px 5% 50px; border-bottom: 1px solid rgba(255,255,255,0.05); }
 .category-section { padding: 100px 5%; border-bottom: 1px solid rgba(255,255,255,0.05); scroll-margin-top: 50px; }
 .category-title { font-size: 3rem; font-weight: 900; color: var(--accent-blue); margin-bottom: 60px; text-transform: uppercase; display: flex; align-items: center; gap: 20px;}
 .category-title img { height: 80px; width: auto; object-fit: contain; }
-.sub-project {
-    margin-bottom: 80px; background: rgba(255,255,255,0.02); padding: 30px; border-radius: 20px; border: 1px solid transparent; transition: 0.3s;
-}
+.sub-project { margin-bottom: 80px; background: rgba(255,255,255,0.02); padding: 30px; border-radius: 20px; border: 1px solid transparent; transition: 0.3s; }
 .sub-project:hover { border-color: rgba(255, 123, 0, 0.3); background: rgba(255,255,255,0.04); }
 .sub-project-info h3 { font-size: 1.5rem; color: #fff; margin-bottom: 10px; }
 .sub-project-info p { color: #aaa; margin-bottom: 25px; max-width: 800px; line-height: 1.6; }
@@ -150,67 +117,50 @@ nav {
 .gallery-img:hover { opacity: 1; transform: scale(1.03); }
 
 /* --- FOOTER --- */
-footer {
-    padding: 100px 5%; text-align: center; border-top: 1px solid rgba(255,255,255,0.05);
-    background: var(--bg-color); position: relative; z-index: 5; scroll-margin-top: 50px;
-}
+footer { padding: 100px 5%; text-align: center; border-top: 1px solid rgba(255,255,255,0.05); background: var(--bg-color); position: relative; z-index: 5; scroll-margin-top: 50px; }
 .footer-cta { font-size: 4vw; font-weight: 900; margin-bottom: 40px; line-height: 1.2; color: #fff; text-transform: uppercase; letter-spacing: 2px;}
 .social-links { display: flex; justify-content: center; gap: 30px; margin-bottom: 50px; }
-.social-icon { 
-    font-size: 1.8rem; color: #777; transition: 0.3s;
-    display: flex; align-items: center; justify-content: center; font-weight: 900; text-transform: uppercase; font-family: 'Montserrat', sans-serif;
-}
+.social-icon { font-size: 1.8rem; color: #777; transition: 0.3s; display: flex; align-items: center; justify-content: center; font-weight: 900; text-transform: uppercase; font-family: 'Montserrat', sans-serif; }
 .social-icon:hover { color: var(--accent-orange); transform: translateY(-5px); }
-.footer-btn {
-    display: inline-block; padding: 18px 50px; border: 2px solid var(--accent-blue); border-radius: 50px;
-    font-size: 1.1rem; text-transform: uppercase; font-weight: 800; letter-spacing: 1px; transition: 0.3s; 
-    color: var(--accent-blue); margin-bottom: 50px; background: transparent;
-}
+.footer-btn { display: inline-block; padding: 18px 50px; border: 2px solid var(--accent-blue); border-radius: 50px; font-size: 1.1rem; text-transform: uppercase; font-weight: 800; letter-spacing: 1px; transition: 0.3s; color: var(--accent-blue); margin-bottom: 50px; background: transparent; }
 .footer-btn:hover { background: var(--accent-blue); color: #000; box-shadow: 0 0 25px rgba(0, 198, 255, 0.6); }
 .copyright { font-size: 0.8rem; color: #444; line-height: 1.6; }
 
-
 /* ========================================= */
-/* ИСПРАВЛЕНИЯ ДЛЯ МОБИЛЬНОЙ ВЕРСИИ */
+/* МОБИЛЬНАЯ ВЕРСИЯ */
 /* ========================================= */
 @media (max-width: 768px) {
     * { cursor: auto !important; } .cursor { display: none; }
     
-    /* 1. Меню: Уменьшаем отступы чтобы не резалось */
     nav { padding: 20px 3%; }
     .nav-links { gap: 10px; }
     .nav-link { font-size: 0.7rem; padding: 4px 8px; }
 
-    /* 2. Заголовок: Уменьшаем шрифт чтобы влезал */
-    .hero-photo { display: none; } 
-    .hero h1 { font-size: 11vw; } /* Было 14vw */
-    
-    /* 3. Обо мне: Центрирование */
-    .about-container { 
-        flex-direction: column; 
-        align-items: center; /* Центрируем по горизонтали */
-        gap: 30px; 
-    }
-    .about-photo-frame { 
-        width: 80%; /* Фото чуть уже экрана */
-        min-width: unset; /* Снимаем ограничение */
-        flex: none;
-    }
-    .about-content {
-        text-align: center; /* Текст по центру */
+    /* ФОТО НА МОБИЛЬНОМ: Видно, НЕ прозрачно, на заднем плане */
+    .hero-photo { 
+        display: block;
+        height: 60vh;
+        right: -20%;
+        bottom: 0;
+        opacity: 1; /* Непрозрачное */
+        z-index: 0; 
+        filter: drop-shadow(0 0 20px rgba(0, 198, 255, 0.4)); /* Свечение */
+    } 
+    .hero h1 { 
+        font-size: 11vw; 
+        position: relative; 
+        z-index: 10; 
+        text-shadow: 0 0 20px rgba(0,0,0,0.8); /* Тень тексту для читаемости */
     }
     
-    /* 4. Бегущая строка: Фикс отступов */
-    .marquee-container {
-        width: 100%;
-        margin-left: 0;
-        margin-right: 0;
-    }
-
-    /* Прочие мобильные правки */
+    .about-container { flex-direction: column; align-items: center; gap: 30px; }
+    .about-photo-frame { width: 80%; min-width: unset; flex: none;}
+    .about-content { text-align: center; }
+    
+    .marquee-container { width: 100%; margin: 0; }
     .footer-cta { font-size: 2rem; }
     .project-item { flex-direction: column; align-items: flex-start; gap: 10px; }
     .gallery-grid { grid-template-columns: 1fr; }
-    .nav-image-icon { display: none; } /* Скрываем иконки в меню на телефоне */
+    .nav-image-icon { display: none; }
     .projects-main-header { font-size: 2.5rem; padding-top: 100px; }
 }

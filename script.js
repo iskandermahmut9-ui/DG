@@ -1,37 +1,60 @@
 document.addEventListener('DOMContentLoaded', () => {
     
-    // --- 1. МОБИЛЬНАЯ ПОДСВЕТКА ПРИ СКРОЛЛЕ ---
-    // Этот код добавляет класс .mobile-active, когда элемент появляется на экране.
-    // CSS настроен так, что визуально это сработает ТОЛЬКО на ширине < 768px.
+    // --- 1. МОБИЛЬНАЯ ПОДСВЕТКА (УЗКАЯ ПОЛОСА ПО ЦЕНТРУ) ---
+    // rootMargin: '-40% 0px -40% 0px' означает, что мы "обрезаем" 
+    // область видимости на 40% сверху и 40% снизу. 
+    // Остается 20% в центре. Срабатывает только там.
+    
+    const observerOptions = {
+        root: null, // следим относительно окна браузера
+        rootMargin: '-40% 0px -40% 0px', // АКТИВНАЯ ЗОНА ТОЛЬКО ПО ЦЕНТРУ
+        threshold: 0 // срабатывать сразу, как только коснулся этой зоны
+    };
+
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
+                // Если элемент попал в центральную полосу — включаем
                 entry.target.classList.add('mobile-active');
             } else {
-                // Опционально: убираем подсветку, если элемент ушел с экрана
+                // Если ушел выше или ниже — выключаем (чтобы не горело всё подряд)
                 entry.target.classList.remove('mobile-active');
             }
         });
-    }, { threshold: 0.1 });
+    }, observerOptions);
 
-    // Элементы, за которыми следим
-    document.querySelectorAll('.hover-target, .project-item, .hero h1, .gallery-img, .sub-project, .project-link-btn, .zoom-effect, .nav-link, .footer-cta, .social-icon, .footer-btn, .about-photo-frame, .hero, .marquee-container').forEach(el => {
+    // Список элементов, за которыми следим
+    const targets = document.querySelectorAll(
+        '.hover-target, .project-item, .hero h1, .gallery-img, .sub-project, .project-link-btn, .zoom-effect, .nav-link, .footer-cta, .social-icon, .footer-btn, .about-photo-frame, .hero, .marquee-container'
+    );
+
+    targets.forEach(el => {
         observer.observe(el);
     });
 
-    // --- 2. КАСТОМНЫЙ КУРСОР (Работает на ПК) ---
+
+    // --- 2. КАСТОМНЫЙ КУРСОР (ТОЛЬКО ДЛЯ ПК) ---
+    // Проверка на устройство с мышью, чтобы не мешал на тачскринах
+    const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
     const cursor = document.getElementById('cursor');
-    const hoverTargets = document.querySelectorAll('.hover-target');
 
-    document.addEventListener('mousemove', (e) => {
-        cursor.style.left = e.clientX + 'px';
-        cursor.style.top = e.clientY + 'px';
-    });
+    if (!isTouchDevice && cursor) {
+        const hoverTargets = document.querySelectorAll('.hover-target');
 
-    hoverTargets.forEach(target => {
-        target.addEventListener('mouseenter', () => cursor.classList.add('hovered'));
-        target.addEventListener('mouseleave', () => cursor.classList.remove('hovered'));
-    });
+        document.addEventListener('mousemove', (e) => {
+            cursor.style.left = e.clientX + 'px';
+            cursor.style.top = e.clientY + 'px';
+        });
+
+        hoverTargets.forEach(target => {
+            target.addEventListener('mouseenter', () => cursor.classList.add('hovered'));
+            target.addEventListener('mouseleave', () => cursor.classList.remove('hovered'));
+        });
+    } else if (cursor) {
+        // Если это тач-устройство, скрываем курсор от греха подальше
+        cursor.style.display = 'none';
+    }
+
 
     // --- 3. ЛАЙТБОКС (ГАЛЕРЕЯ) ---
     const lightbox = document.getElementById('lightbox-modal');

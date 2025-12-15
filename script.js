@@ -1,46 +1,100 @@
-const cursor = document.getElementById('cursor');
-// Находим все элементы, у которых есть эффект при наведении (класс hover-target)
-const hoverTargets = document.querySelectorAll('.hover-target, a, .gallery-img, .project-item, .marquee-container, .hero');
-
-// 1. Логика курсора (только для ПК)
-document.addEventListener('mousemove', (e) => {
-    cursor.style.left = e.clientX + 'px';
-    cursor.style.top = e.clientY + 'px';
-});
-
-hoverTargets.forEach(target => {
-    target.addEventListener('mouseenter', () => {
-        cursor.classList.add('hovered');
-    });
-    target.addEventListener('mouseleave', () => {
-        cursor.classList.remove('hovered');
-    });
-});
-
-// 2. Логика "Оживления" при скролле (для мобильных)
-function checkScrollAnimation() {
-    // Определяем центр экрана
-    const windowHeight = window.innerHeight;
-    const triggerTop = windowHeight * 0.3;    // 30% от верха
-    const triggerBottom = windowHeight * 0.7; // 70% от верха (ниже этой линии эффект гаснет)
+document.addEventListener('DOMContentLoaded', () => {
     
-    // Проходим по всем активным элементам
-    hoverTargets.forEach(target => {
-        const box = target.getBoundingClientRect();
-        
-        // Вычисляем центр элемента
-        const elementCenter = box.top + (box.height / 2);
+    // --- КАСТОМНЫЙ КУРСОР ---
+    const cursor = document.getElementById('cursor');
+    const hoverTargets = document.querySelectorAll('.hover-target');
 
-        // Если центр элемента находится в "активной зоне" экрана
-        if (elementCenter > triggerTop && elementCenter < triggerBottom) {
-            target.classList.add('mobile-active');
-        } else {
-            target.classList.remove('mobile-active');
-        }
+    document.addEventListener('mousemove', (e) => {
+        cursor.style.left = e.clientX + 'px';
+        cursor.style.top = e.clientY + 'px';
     });
-}
 
-// Запускаем проверку при скролле
-window.addEventListener('scroll', checkScrollAnimation);
-// И один раз при загрузке (чтобы верхние элементы сразу загорелись)
-checkScrollAnimation();
+    hoverTargets.forEach(target => {
+        target.addEventListener('mouseenter', () => cursor.classList.add('hovered'));
+        target.addEventListener('mouseleave', () => cursor.classList.remove('hovered'));
+    });
+
+    // --- ЛАЙТБОКС (СКОУП ПО КЕЙСУ) ---
+    const lightbox = document.getElementById('lightbox-modal');
+    const lightboxImg = document.getElementById('lightbox-img');
+    const closeBtn = document.getElementById('lightbox-close');
+    const prevBtn = document.getElementById('lightbox-prev');
+    const nextBtn = document.getElementById('lightbox-next');
+    
+    // Переменные для хранения текущего набора картинок
+    let currentGalleryGroup = []; 
+    let currentIndex = 0;
+
+    // Функция открытия лайтбокса
+    function openLightbox(index) {
+        currentIndex = index;
+        updateImage();
+        lightbox.classList.add('active');
+        document.body.style.overflow = 'hidden'; 
+    }
+
+    // Обновление картинки src
+    function updateImage() {
+        if (currentGalleryGroup.length > 0) {
+            lightboxImg.src = currentGalleryGroup[currentIndex].src;
+        }
+    }
+
+    function closeLightbox() {
+        lightbox.classList.remove('active');
+        document.body.style.overflow = '';
+        currentGalleryGroup = []; // Очищаем группу при закрытии
+    }
+
+    // ЛОГИКА ЗАЦИКЛЕННОСТИ ВНУТРИ ГРУППЫ
+    function showNext() {
+        if (currentGalleryGroup.length === 0) return;
+        // % позволяет вернуться к 0, когда доходим до конца
+        currentIndex = (currentIndex + 1) % currentGalleryGroup.length;
+        updateImage();
+    }
+
+    function showPrev() {
+        if (currentGalleryGroup.length === 0) return;
+        // + length позволяет корректно уходить с 0 на последний элемент
+        currentIndex = (currentIndex - 1 + currentGalleryGroup.length) % currentGalleryGroup.length;
+        updateImage();
+    }
+
+    // Находим все картинки
+    const allImages = document.querySelectorAll('.gallery-img');
+
+    allImages.forEach(img => {
+        img.addEventListener('click', (e) => {
+            // 1. Находим контейнер (родителя), в котором лежит эта картинка
+            const parentContainer = e.target.closest('.left-gallery-side');
+            
+            // 2. Если родитель найден, собираем ВСЕ картинки только внутри него
+            if (parentContainer) {
+                currentGalleryGroup = Array.from(parentContainer.querySelectorAll('.gallery-img'));
+                
+                // 3. Определяем номер нажатой картинки внутри этой группы
+                const indexClicked = currentGalleryGroup.indexOf(e.target);
+                
+                // 4. Открываем
+                openLightbox(indexClicked);
+            }
+        });
+    });
+
+    // Управление кнопками
+    closeBtn.addEventListener('click', closeLightbox);
+    nextBtn.addEventListener('click', (e) => { e.stopPropagation(); showNext(); });
+    prevBtn.addEventListener('click', (e) => { e.stopPropagation(); showPrev(); });
+
+    lightbox.addEventListener('click', (e) => {
+        if (e.target === lightbox) closeLightbox();
+    });
+
+    document.addEventListener('keydown', (e) => {
+        if (!lightbox.classList.contains('active')) return;
+        if (e.key === 'Escape') closeLightbox();
+        if (e.key === 'ArrowRight') showNext();
+        if (e.key === 'ArrowLeft') showPrev();
+    });
+});

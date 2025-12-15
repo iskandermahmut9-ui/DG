@@ -1,4 +1,6 @@
-/* --- ГЛОБАЛЬНЫЕ НАСТРОЙКИ --- */
+/* ========================================= */
+/* 1. ГЛОБАЛЬНЫЕ НАСТРОЙКИ */
+/* ========================================= */
 :root {
     --bg-color: #050e18;
     --text-color: #e0e0e0;
@@ -20,15 +22,35 @@ body {
 a { text-decoration: none; color: inherit; transition: 0.3s; }
 ul { list-style: none; }
 
-/* --- КУРСОР --- */
+/* ========================================= */
+/* 2. КУРСОР И ОБЩИЕ ЭФФЕКТЫ */
+/* ========================================= */
+
+/* Кастомный курсор */
 .cursor {
     position: fixed; width: var(--cursor-size); height: var(--cursor-size);
-    border: 1px solid var(--accent-blue); border-radius: 50%; pointer-events: none; z-index: 9999;
-    transform: translate(-50%, -50%); transition: width 0.3s, height 0.3s, background-color 0.3s; mix-blend-mode: exclusion;
+    border: 1px solid var(--accent-blue); border-radius: 50%; 
+    pointer-events: none; 
+    z-index: 999999; /* Всегда поверх всего */
+    transform: translate(-50%, -50%); 
+    transition: width 0.3s, height 0.3s, background-color 0.3s; 
+    mix-blend-mode: exclusion;
 }
 .cursor.hovered { width: 60px; height: 60px; background-color: rgba(255, 123, 0, 0.2); border-color: var(--accent-orange); backdrop-filter: blur(2px); }
 
-/* --- НАВИГАЦИЯ --- */
+/* Эффект "Живости" (Зум для текста/заголовков) */
+.zoom-effect {
+    transition: transform 0.3s ease-in-out;
+    display: inline-block;
+    transform-origin: left center;
+}
+.zoom-effect:hover {
+    transform: scale(1.05);
+}
+
+/* ========================================= */
+/* 3. НАВИГАЦИЯ */
+/* ========================================= */
 nav {
     position: fixed; top: 0; left: 0; width: 100%; display: flex; justify-content: space-between; align-items: flex-start;
     padding: 30px 5%; z-index: 1000; background: transparent; pointer-events: none;
@@ -48,46 +70,42 @@ nav {
 .nav-image-icon { height: 18px; width: auto; object-fit: contain; filter: grayscale(100%) brightness(200%); transition: 0.3s; }
 .nav-link:hover .nav-image-icon, .nav-link.mobile-active .nav-image-icon { filter: grayscale(0%); }
 
-/* --- HERO --- */
+/* ========================================= */
+/* 4. ГЛАВНАЯ СТРАНИЦА (HERO, MARQUEE, ABOUT) */
+/* ========================================= */
+
+/* Hero Section */
 .hero { 
-    height: 100vh; display: flex; flex-direction: column; justify-content: center; padding: 0 5%; position: relative; overflow: hidden; width: 100%;
+    height: 100vh; display: flex; flex-direction: column; justify-content: center; padding: 0 5%; position: relative; overflow: hidden; width: 100%; 
 }
-.hero-photo {
-    position: absolute; bottom: 0; right: 5%; height: 90vh; width: auto; z-index: 1; pointer-events: none; opacity: 0.9;
-    filter: grayscale(20%) contrast(110%) drop-shadow(0 0 30px rgba(0, 198, 255, 0.1));
-    mask-image: linear-gradient(to bottom, black 80%, transparent 100%); -webkit-mask-image: linear-gradient(to bottom, black 80%, transparent 100%); transition: 0.5s;
+.hero-photo { 
+    position: absolute; bottom: 0; right: 5%; height: 90vh; width: auto; z-index: 1; pointer-events: none; opacity: 0.9; 
+    filter: grayscale(20%) contrast(110%) drop-shadow(0 0 30px rgba(0, 198, 255, 0.1)); 
+    mask-image: linear-gradient(to bottom, black 80%, transparent 100%); -webkit-mask-image: linear-gradient(to bottom, black 80%, transparent 100%); transition: 0.5s; 
 }
 .hero:hover .hero-photo, .hero.mobile-active .hero-photo { filter: grayscale(0%) contrast(100%) drop-shadow(0 0 40px rgba(0, 198, 255, 0.2)); transform: scale(1.02); }
 
-.hero h1 {
-    font-size: 9vw; line-height: 0.9; font-weight: 900; text-transform: uppercase; color: transparent;
+.hero h1 { 
+    font-size: 9vw; line-height: 0.9; font-weight: 900; text-transform: uppercase; color: transparent; 
     -webkit-text-stroke: 1px rgba(255,255,255,0.3); position: relative; z-index: 10; transition: 0.5s; white-space: nowrap; 
 }
 .hero h1:hover, .hero h1.mobile-active { -webkit-text-stroke: 2px var(--accent-blue); color: rgba(0, 198, 255, 0.05); }
 .hero-subtitle { margin-top: 30px; font-size: 1.2rem; color: var(--accent-orange); letter-spacing: 4px; text-transform: uppercase; font-weight: 500; z-index: 10; }
 
-/* --- MARQUEE --- */
-.marquee-container {
-    padding: 40px 0; border-top: 1px solid rgba(255,255,255,0.1); border-bottom: 1px solid rgba(255,255,255,0.1);
-    overflow: hidden; white-space: nowrap; background: #02080f; position: relative; z-index: 5; 
-    width: 100%; margin: 0; max-width: 100vw; transition: 0.3s;
+/* Marquee (Бегущая строка) */
+.marquee-container { 
+    padding: 40px 0; border-top: 1px solid rgba(255,255,255,0.1); border-bottom: 1px solid rgba(255,255,255,0.1); 
+    overflow: hidden; white-space: nowrap; background: #02080f; position: relative; z-index: 5; width: 100%; margin: 0; max-width: 100vw; transition: 0.3s; 
 }
 .marquee-content { display: inline-block; animation: marquee 20s linear infinite; }
 .marquee-item { font-size: 3rem; font-weight: 900; text-transform: uppercase; margin-right: 60px; color: rgba(255,255,255,0.05); transition: 0.3s; }
-.marquee-container:hover .marquee-item, .marquee-container.mobile-active .marquee-item { 
-    color: var(--accent-blue); text-shadow: 0 0 10px rgba(0, 198, 255, 0.5); 
-}
+.marquee-container:hover .marquee-item, .marquee-container.mobile-active .marquee-item { color: var(--accent-blue); text-shadow: 0 0 10px rgba(0, 198, 255, 0.5); }
 @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
 
-/* --- ABOUT BLOCK --- */
-.about-block {
-    padding: 100px 5%; background: radial-gradient(circle at left, rgba(0, 198, 255, 0.03), transparent 50%);
-    border-bottom: 1px solid rgba(255,255,255,0.05); position: relative; z-index: 5; scroll-margin-top: 50px;
-}
+/* About Block */
+.about-block { padding: 100px 5%; background: radial-gradient(circle at left, rgba(0, 198, 255, 0.03), transparent 50%); border-bottom: 1px solid rgba(255,255,255,0.05); position: relative; z-index: 5; scroll-margin-top: 50px; }
 .about-container { display: flex; align-items: center; justify-content: space-between; gap: 60px; margin-top: 40px; }
-.about-photo-frame {
-    flex: 0 0 35%; width: 35%; min-width: 300px; height: auto; background: transparent; border: none; box-shadow: none; overflow: visible;
-}
+.about-photo-frame { flex: 0 0 35%; width: 35%; min-width: 300px; height: auto; background: transparent; border: none; box-shadow: none; overflow: visible; }
 .about-img-real { width: 100%; height: auto; object-fit: contain; filter: drop-shadow(0 0 15px rgba(0, 198, 255, 0.3)); transition: 0.5s; }
 .about-photo-frame:hover .about-img-real, .about-photo-frame.mobile-active .about-img-real { filter: drop-shadow(0 0 30px rgba(0, 198, 255, 0.6)); transform: scale(1.03); }
 .about-content { flex: 1; }
@@ -95,100 +113,192 @@ nav {
 .about-text { font-size: 1.1rem; line-height: 1.8; color: #bbb; }
 .about-highlight { color: var(--accent-blue); font-weight: bold; }
 
-/* --- ПРОЕКТЫ --- */
+/* Work Section (Список проектов на главной) */
 .work-section { padding: 100px 5%; position: relative; z-index: 5; background: var(--bg-color); }
 .section-header { font-size: 0.9rem; text-transform: uppercase; color: #777; margin-bottom: 50px; display: block; letter-spacing: 2px; }
 .project-list { display: flex; flex-direction: column; }
-.project-item {
-    padding: 50px 0; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: center; transition: 0.4s; cursor: none;
-}
-.project-item:hover, .project-item.mobile-active {
-    padding-left: 30px; border-bottom: 1px solid var(--accent-orange); background: linear-gradient(90deg, rgba(255,123,0,0.05), transparent);
-}
+.project-item { padding: 50px 0; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: center; transition: 0.4s; cursor: none; }
+.project-item:hover, .project-item.mobile-active { padding-left: 30px; border-bottom: 1px solid var(--accent-orange); background: linear-gradient(90deg, rgba(255,123,0,0.05), transparent); }
 .project-img-title { height: 60px; width: auto; object-fit: contain; filter: grayscale(100%) brightness(200%); transition: 0.3s; }
 .project-item:hover .project-img-title, .project-item.mobile-active .project-img-title { filter: grayscale(0%); }
-
 .project-name { font-size: 2.5rem; font-weight: 700; text-transform: uppercase; color: #fff; }
 .project-cat { font-size: 1rem; color: #777; font-style: italic; }
 
-/* --- ВТОРАЯ СТРАНИЦА --- */
-.projects-main-header { font-size: 4rem; font-weight: 900; text-transform: uppercase; color: var(--accent-blue); padding: 150px 5% 50px; border-bottom: 1px solid rgba(255,255,255,0.05); }
-.category-section { padding: 100px 5%; border-bottom: 1px solid rgba(255,255,255,0.05); scroll-margin-top: 50px; }
-.category-title { font-size: 3rem; font-weight: 900; color: var(--accent-blue); margin-bottom: 60px; text-transform: uppercase; display: flex; align-items: center; gap: 20px;}
-.category-title img { height: 80px; width: auto; object-fit: contain; }
-.sub-project { margin-bottom: 80px; background: rgba(255,255,255,0.02); padding: 30px; border-radius: 20px; border: 1px solid transparent; transition: 0.3s; }
-.sub-project:hover, .sub-project.mobile-active { border-color: rgba(255, 123, 0, 0.3); background: rgba(255,255,255,0.04); }
-.sub-project-info h3 { font-size: 1.5rem; color: #fff; margin-bottom: 10px; }
-.sub-project-info p { color: #aaa; margin-bottom: 25px; max-width: 800px; line-height: 1.6; }
-.gallery-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
-.gallery-img { width: 100%; height: 200px; object-fit: cover; border-radius: 10px; opacity: 0.7; transition: 0.4s; background: #111; }
-.gallery-img:hover, .gallery-img.mobile-active { opacity: 1; transform: scale(1.03); }
+/* ========================================= */
+/* 5. СТРАНИЦА ПРОЕКТОВ (projects.html) */
+/* ========================================= */
+.projects-main-header { 
+    font-size: 4rem; font-weight: 900; text-transform: uppercase; color: var(--accent-blue); 
+    padding: 100px 5% 50px; border-bottom: 1px solid rgba(255,255,255,0.05); 
+}
 
-/* --- FOOTER --- */
+.category-section { 
+    padding: 80px 5%; border-bottom: 1px solid rgba(255,255,255,0.05); scroll-margin-top: 50px; 
+}
+
+.category-title { 
+    font-size: 3rem; font-weight: 900; color: var(--accent-blue); margin-bottom: 60px; 
+    text-transform: uppercase; display: inline-block; 
+}
+.category-title img { height: 80px; width: auto; object-fit: contain; }
+
+/* Контейнер Кейса */
+.sub-project { 
+    margin-bottom: 80px; 
+    background: rgba(255,255,255,0.02); 
+    padding: 40px; 
+    border-radius: 20px; 
+    border: 1px solid transparent; 
+    transition: 0.3s; 
+}
+.sub-project:hover { border-color: rgba(255, 123, 0, 0.3); background: rgba(255,255,255,0.04); }
+
+.case-title {
+    font-size: 2rem;
+    color: #fff;
+    margin-bottom: 30px;
+    text-transform: uppercase;
+    display: block;
+}
+
+/* Разделение на Галерею и Текст */
+.project-split-container {
+    display: flex;
+    gap: 40px;
+    align-items: stretch; 
+}
+
+/* Левая часть: Галерея */
+.left-gallery-side {
+    flex: 0 0 50%; 
+    display: grid; 
+    grid-template-columns: repeat(3, 1fr); /* РОВНО 3 КОЛОНКИ */
+    gap: 15px; 
+    align-content: start; 
+}
+
+/* Правая часть: Описание */
+.right-description-side {
+    flex: 1;
+    display: flex;
+    align-items: center; 
+}
+
+/* Обертка, если нужно разместить текст и кнопку вертикально */
+.description-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.case-description {
+    font-size: 1.6rem;          
+    font-weight: 700;           
+    color: var(--accent-orange);
+    line-height: 1.4;
+}
+
+/* --- Кнопка в проектах (ТГ каналы) --- */
+.project-link-btn {
+    display: inline-block;
+    margin-top: 30px; /* Отступ от текста */
+    padding: 12px 35px; /* Чуть меньше чем в футере */
+    border: 2px solid var(--accent-blue);
+    border-radius: 50px;
+    color: var(--accent-blue);
+    font-size: 1rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: 0.3s;
+    background: transparent;
+    cursor: pointer; /* На случай, если скрипт с курсором не прогрузился */
+    position: relative;
+    z-index: 20; /* Чтобы была кликабельна */
+}
+
+.project-link-btn:hover {
+    background: var(--accent-blue);
+    color: #000;
+    box-shadow: 0 0 20px rgba(0, 198, 255, 0.6);
+}
+
+/* --- Картинки в галерее (Зум + Слои) --- */
+.gallery-img { 
+    width: 100%; 
+    height: auto; 
+    aspect-ratio: 1 / 1; 
+    object-fit: cover; 
+    border-radius: 10px; 
+    opacity: 0.9; 
+    transition: all 0.3s ease; 
+    background: #111; 
+    position: relative;
+    z-index: 10; 
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+.gallery-img:hover { 
+    opacity: 1; 
+    transform: scale(1.1); 
+    z-index: 50; /* Поднимается, но ниже курсора */
+    box-shadow: 0 15px 30px rgba(0,0,0,0.6);
+    border: 2px solid var(--accent-blue);
+}
+
+/* ========================================= */
+/* 6. ФУТЕР И ЛАЙТБОКС */
+/* ========================================= */
 footer { padding: 100px 5%; text-align: center; border-top: 1px solid rgba(255,255,255,0.05); background: var(--bg-color); position: relative; z-index: 5; scroll-margin-top: 50px; }
 .footer-cta { font-size: 4vw; font-weight: 900; margin-bottom: 40px; line-height: 1.2; color: #fff; text-transform: uppercase; letter-spacing: 2px; transition: 0.3s;}
 .footer-cta:hover, .footer-cta.mobile-active { text-shadow: 0 0 20px rgba(0, 198, 255, 0.4); color: var(--accent-blue); }
-
 .social-links { display: flex; justify-content: center; gap: 30px; margin-bottom: 50px; }
-.social-icon { 
-    font-size: 1.8rem; color: #777; transition: 0.3s; 
-    display: flex; align-items: center; justify-content: center; font-weight: 900; text-transform: uppercase; font-family: 'Montserrat', sans-serif;
-}
+.social-icon { font-size: 1.8rem; color: #777; transition: 0.3s; display: flex; align-items: center; justify-content: center; font-weight: 900; text-transform: uppercase; font-family: 'Montserrat', sans-serif; }
 .social-icon:hover, .social-icon.mobile-active { color: var(--accent-orange); transform: translateY(-5px); }
-
 .footer-btn { display: inline-block; padding: 18px 50px; border: 2px solid var(--accent-blue); border-radius: 50px; font-size: 1.1rem; text-transform: uppercase; font-weight: 800; letter-spacing: 1px; transition: 0.3s; color: var(--accent-blue); margin-bottom: 50px; background: transparent; }
 .footer-btn:hover, .footer-btn.mobile-active { background: var(--accent-blue); color: #000; box-shadow: 0 0 25px rgba(0, 198, 255, 0.6); }
 .copyright { font-size: 0.8rem; color: #444; line-height: 1.6; }
 
+/* Лайтбокс */
+.lightbox-modal { display: none; position: fixed; z-index: 10000; left: 0; top: 0; width: 100%; height: 100%; overflow: hidden; background-color: rgba(0,0,0,0.95); backdrop-filter: blur(5px); align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s; }
+.lightbox-modal.active { display: flex; opacity: 1; pointer-events: auto; }
+.lightbox-content { max-width: 90%; max-height: 90%; border-radius: 5px; box-shadow: 0 0 50px rgba(0,0,0,0.8); object-fit: contain; }
+.close-btn { position: absolute; top: 20px; right: 30px; color: #fff; font-size: 40px; font-weight: bold; cursor: pointer; transition: 0.3s; z-index: 10001; }
+.close-btn:hover { color: var(--accent-blue); }
+.prev-btn, .next-btn { position: absolute; top: 50%; transform: translateY(-50%); color: #fff; font-size: 30px; font-weight: bold; padding: 20px; cursor: pointer; user-select: none; transition: 0.3s; background: rgba(0,0,0,0.2); border-radius: 50%; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; z-index: 10001; }
+.prev-btn:hover, .next-btn:hover { background: rgba(255,255,255,0.1); color: var(--accent-blue); }
+.prev-btn { left: 20px; }
+.next-btn { right: 20px; }
+
 /* ========================================= */
-/* МОБИЛЬНАЯ ВЕРСИЯ */
+/* 7. АДАПТИВНОСТЬ (MOBILE) */
 /* ========================================= */
 @media (max-width: 768px) {
     * { cursor: auto !important; } .cursor { display: none; }
+    nav { padding: 20px 3%; } .nav-links { gap: 10px; } .nav-link { font-size: 0.7rem; padding: 4px 8px; }
     
-    nav { padding: 20px 3%; }
-    .nav-links { gap: 10px; }
-    .nav-link { font-size: 0.7rem; padding: 4px 8px; }
-
-    /* ФОТО НА МОБИЛЬНОМ */
-    .hero-photo { 
-        display: block;
-        height: 50vh;          
-        top: 12%;              
-        bottom: auto;          
-        right: -10%;           
-        opacity: 1;            
-        z-index: 0; 
-        
-        /* 1. Уменьшаем радиус свечения (было 20px, стало 10px), чтобы убрать резкие края */
-        filter: drop-shadow(0 0 10px rgba(0, 198, 255, 0.3));
-        
-        /* 2. Добавляем маску снизу, чтобы плавно растворить обрезку */
-        mask-image: linear-gradient(to bottom, black 85%, transparent 100%);
-        -webkit-mask-image: linear-gradient(to bottom, black 85%, transparent 100%);
-    } 
-    /* Активное состояние фото */
-    .hero.mobile-active .hero-photo {
-        /* При активации свечение становится чуть ярче и шире */
-        filter: drop-shadow(0 0 20px rgba(0, 198, 255, 0.6));
-    }
-
-    .hero h1 { 
-        font-size: 12vw;      
-        position: relative; 
-        z-index: 10; 
-        margin-top: 20vh;     
-        text-shadow: 0 0 30px rgba(0,0,0,0.9);
-    }
+    /* Hero Mobile */
+    .hero-photo { display: block; height: 50vh; top: 12%; bottom: auto; right: -10%; opacity: 1; z-index: 0; filter: drop-shadow(0 0 10px rgba(0, 198, 255, 0.3)); mask-image: linear-gradient(to bottom, black 85%, transparent 100%); -webkit-mask-image: linear-gradient(to bottom, black 85%, transparent 100%); } 
+    .hero.mobile-active .hero-photo { filter: drop-shadow(0 0 20px rgba(0, 198, 255, 0.6)); }
+    .hero h1 { font-size: 12vw; position: relative; z-index: 10; margin-top: 20vh; text-shadow: 0 0 30px rgba(0,0,0,0.9); }
     
+    /* About Mobile */
     .about-container { flex-direction: column; align-items: center; gap: 30px; }
     .about-photo-frame { width: 80%; min-width: unset; flex: none;}
     .about-content { text-align: center; }
-    
     .marquee-container { width: 100%; margin: 0; }
-    .footer-cta { font-size: 2rem; }
     .project-item { flex-direction: column; align-items: flex-start; gap: 10px; }
-    .gallery-grid { grid-template-columns: 1fr; }
+    .footer-cta { font-size: 2rem; }
     .nav-image-icon { display: none; }
+    
+    /* Projects Page Mobile */
     .projects-main-header { font-size: 2.5rem; padding-top: 100px; }
+    .project-split-container { flex-direction: column; gap: 30px; }
+    .left-gallery-side, .right-description-side { flex: 0 0 100%; }
+    /* На телефоне перестраиваемся в 2 колонки или авто */
+    .left-gallery-side { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
+    .case-title { font-size: 1.5rem; }
+    .case-description { font-size: 1.2rem; }
+    
+    .prev-btn, .next-btn { width: 40px; height: 40px; font-size: 20px; padding: 10px; background: rgba(0,0,0,0.5); }
 }

@@ -38,12 +38,13 @@ ul { list-style: none; }
 }
 .cursor.hovered { width: 60px; height: 60px; background-color: rgba(255, 123, 0, 0.2); border-color: var(--accent-orange); backdrop-filter: blur(2px); }
 
-/* Эффект "Живости" (Зум для текста/заголовков) */
+/* Эффект "Живости" (Зум) - ДЛЯ ПК (HOVER) */
 .zoom-effect {
     transition: transform 0.3s ease-in-out;
     display: inline-block;
     transform-origin: left center;
 }
+/* ВАЖНО: Тут только hover, без mobile-active */
 .zoom-effect:hover {
     transform: scale(1.05);
 }
@@ -58,7 +59,7 @@ nav {
 }
 .logo-container, .nav-links { pointer-events: auto; }
 .logo-container img { height: 50px; width: auto; filter: drop-shadow(0 0 5px rgba(0, 198, 255, 0.3)); transition: 0.3s; display: block; }
-.logo-container:hover img, .logo-container.mobile-active img { transform: scale(1.05); filter: drop-shadow(0 0 15px rgba(0, 198, 255, 0.8)); }
+.logo-container:hover img { transform: scale(1.05); filter: drop-shadow(0 0 15px rgba(0, 198, 255, 0.8)); }
 
 .nav-links { display: flex; flex-direction: column; align-items: flex-end; gap: 15px; }
 .nav-link {
@@ -66,15 +67,14 @@ nav {
     background: rgba(5, 14, 24, 0.6); backdrop-filter: blur(5px); border-radius: 5px; border: 1px solid rgba(255,255,255,0.05);
     display: flex; align-items: center; justify-content: flex-end;
 }
-.nav-link:hover, .nav-link.mobile-active { color: var(--accent-blue); border-color: var(--accent-blue); transform: translateX(-5px); }
+.nav-link:hover { color: var(--accent-blue); border-color: var(--accent-blue); transform: translateX(-5px); }
 .nav-image-icon { height: 18px; width: auto; object-fit: contain; filter: grayscale(100%) brightness(200%); transition: 0.3s; }
-.nav-link:hover .nav-image-icon, .nav-link.mobile-active .nav-image-icon { filter: grayscale(0%); }
+.nav-link:hover .nav-image-icon { filter: grayscale(0%); }
 
 /* ========================================= */
 /* 4. ГЛАВНАЯ СТРАНИЦА (HERO, MARQUEE, ABOUT) */
 /* ========================================= */
 
-/* Hero Section */
 .hero { 
     height: 100vh; display: flex; flex-direction: column; justify-content: center; padding: 0 5%; position: relative; overflow: hidden; width: 100%; 
 }
@@ -83,44 +83,41 @@ nav {
     filter: grayscale(20%) contrast(110%) drop-shadow(0 0 30px rgba(0, 198, 255, 0.1)); 
     mask-image: linear-gradient(to bottom, black 80%, transparent 100%); -webkit-mask-image: linear-gradient(to bottom, black 80%, transparent 100%); transition: 0.5s; 
 }
-.hero:hover .hero-photo, .hero.mobile-active .hero-photo { filter: grayscale(0%) contrast(100%) drop-shadow(0 0 40px rgba(0, 198, 255, 0.2)); transform: scale(1.02); }
+.hero:hover .hero-photo { filter: grayscale(0%) contrast(100%) drop-shadow(0 0 40px rgba(0, 198, 255, 0.2)); transform: scale(1.02); }
 
 .hero h1 { 
     font-size: 9vw; line-height: 0.9; font-weight: 900; text-transform: uppercase; color: transparent; 
     -webkit-text-stroke: 1px rgba(255,255,255,0.3); position: relative; z-index: 10; transition: 0.5s; white-space: nowrap; 
 }
-.hero h1:hover, .hero h1.mobile-active { -webkit-text-stroke: 2px var(--accent-blue); color: rgba(0, 198, 255, 0.05); }
+.hero h1:hover { -webkit-text-stroke: 2px var(--accent-blue); color: rgba(0, 198, 255, 0.05); }
 .hero-subtitle { margin-top: 30px; font-size: 1.2rem; color: var(--accent-orange); letter-spacing: 4px; text-transform: uppercase; font-weight: 500; z-index: 10; }
 
-/* Marquee (Бегущая строка) */
 .marquee-container { 
     padding: 40px 0; border-top: 1px solid rgba(255,255,255,0.1); border-bottom: 1px solid rgba(255,255,255,0.1); 
     overflow: hidden; white-space: nowrap; background: #02080f; position: relative; z-index: 5; width: 100%; margin: 0; max-width: 100vw; transition: 0.3s; 
 }
 .marquee-content { display: inline-block; animation: marquee 20s linear infinite; }
 .marquee-item { font-size: 3rem; font-weight: 900; text-transform: uppercase; margin-right: 60px; color: rgba(255,255,255,0.05); transition: 0.3s; }
-.marquee-container:hover .marquee-item, .marquee-container.mobile-active .marquee-item { color: var(--accent-blue); text-shadow: 0 0 10px rgba(0, 198, 255, 0.5); }
+.marquee-container:hover .marquee-item { color: var(--accent-blue); text-shadow: 0 0 10px rgba(0, 198, 255, 0.5); }
 @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
 
-/* About Block */
 .about-block { padding: 100px 5%; background: radial-gradient(circle at left, rgba(0, 198, 255, 0.03), transparent 50%); border-bottom: 1px solid rgba(255,255,255,0.05); position: relative; z-index: 5; scroll-margin-top: 50px; }
 .about-container { display: flex; align-items: center; justify-content: space-between; gap: 60px; margin-top: 40px; }
 .about-photo-frame { flex: 0 0 35%; width: 35%; min-width: 300px; height: auto; background: transparent; border: none; box-shadow: none; overflow: visible; }
 .about-img-real { width: 100%; height: auto; object-fit: contain; filter: drop-shadow(0 0 15px rgba(0, 198, 255, 0.3)); transition: 0.5s; }
-.about-photo-frame:hover .about-img-real, .about-photo-frame.mobile-active .about-img-real { filter: drop-shadow(0 0 30px rgba(0, 198, 255, 0.6)); transform: scale(1.03); }
+.about-photo-frame:hover .about-img-real { filter: drop-shadow(0 0 30px rgba(0, 198, 255, 0.6)); transform: scale(1.03); }
 .about-content { flex: 1; }
 .about-title { font-size: 3rem; font-weight: 900; color: #fff; text-transform: uppercase; margin-bottom: 30px;}
 .about-text { font-size: 1.1rem; line-height: 1.8; color: #bbb; }
 .about-highlight { color: var(--accent-blue); font-weight: bold; }
 
-/* Work Section (Список проектов на главной) */
 .work-section { padding: 100px 5%; position: relative; z-index: 5; background: var(--bg-color); }
 .section-header { font-size: 0.9rem; text-transform: uppercase; color: #777; margin-bottom: 50px; display: block; letter-spacing: 2px; }
 .project-list { display: flex; flex-direction: column; }
 .project-item { padding: 50px 0; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: center; transition: 0.4s; cursor: none; }
-.project-item:hover, .project-item.mobile-active { padding-left: 30px; border-bottom: 1px solid var(--accent-orange); background: linear-gradient(90deg, rgba(255,123,0,0.05), transparent); }
+.project-item:hover { padding-left: 30px; border-bottom: 1px solid var(--accent-orange); background: linear-gradient(90deg, rgba(255,123,0,0.05), transparent); }
 .project-img-title { height: 60px; width: auto; object-fit: contain; filter: grayscale(100%) brightness(200%); transition: 0.3s; }
-.project-item:hover .project-img-title, .project-item.mobile-active .project-img-title { filter: grayscale(0%); }
+.project-item:hover .project-img-title { filter: grayscale(0%); }
 .project-name { font-size: 2.5rem; font-weight: 700; text-transform: uppercase; color: #fff; }
 .project-cat { font-size: 1rem; color: #777; font-style: italic; }
 
@@ -142,7 +139,6 @@ nav {
 }
 .category-title img { height: 80px; width: auto; object-fit: contain; }
 
-/* Контейнер Кейса */
 .sub-project { 
     margin-bottom: 80px; 
     background: rgba(255,255,255,0.02); 
@@ -161,30 +157,26 @@ nav {
     display: block;
 }
 
-/* Разделение на Галерею и Текст */
 .project-split-container {
     display: flex;
     gap: 40px;
     align-items: stretch; 
 }
 
-/* Левая часть: Галерея */
 .left-gallery-side {
     flex: 0 0 50%; 
     display: grid; 
-    grid-template-columns: repeat(3, 1fr); /* РОВНО 3 КОЛОНКИ */
+    grid-template-columns: repeat(3, 1fr); 
     gap: 15px; 
     align-content: start; 
 }
 
-/* Правая часть: Описание */
 .right-description-side {
     flex: 1;
     display: flex;
     align-items: center; 
 }
 
-/* Обертка, если нужно разместить текст и кнопку вертикально */
 .description-wrapper {
     display: flex;
     flex-direction: column;
@@ -198,11 +190,10 @@ nav {
     line-height: 1.4;
 }
 
-/* --- Кнопка в проектах (ТГ каналы) --- */
 .project-link-btn {
     display: inline-block;
-    margin-top: 30px; /* Отступ от текста */
-    padding: 12px 35px; /* Чуть меньше чем в футере */
+    margin-top: 30px; 
+    padding: 12px 35px; 
     border: 2px solid var(--accent-blue);
     border-radius: 50px;
     color: var(--accent-blue);
@@ -212,18 +203,16 @@ nav {
     letter-spacing: 1px;
     transition: 0.3s;
     background: transparent;
-    cursor: pointer; /* На случай, если скрипт с курсором не прогрузился */
+    cursor: pointer; 
     position: relative;
-    z-index: 20; /* Чтобы была кликабельна */
+    z-index: 20; 
 }
-
 .project-link-btn:hover {
     background: var(--accent-blue);
     color: #000;
     box-shadow: 0 0 20px rgba(0, 198, 255, 0.6);
 }
 
-/* --- Картинки в галерее (Зум + Слои) --- */
 .gallery-img { 
     width: 100%; 
     height: auto; 
@@ -241,7 +230,7 @@ nav {
 .gallery-img:hover { 
     opacity: 1; 
     transform: scale(1.1); 
-    z-index: 50; /* Поднимается, но ниже курсора */
+    z-index: 50; 
     box-shadow: 0 15px 30px rgba(0,0,0,0.6);
     border: 2px solid var(--accent-blue);
 }
@@ -251,12 +240,12 @@ nav {
 /* ========================================= */
 footer { padding: 100px 5%; text-align: center; border-top: 1px solid rgba(255,255,255,0.05); background: var(--bg-color); position: relative; z-index: 5; scroll-margin-top: 50px; }
 .footer-cta { font-size: 4vw; font-weight: 900; margin-bottom: 40px; line-height: 1.2; color: #fff; text-transform: uppercase; letter-spacing: 2px; transition: 0.3s;}
-.footer-cta:hover, .footer-cta.mobile-active { text-shadow: 0 0 20px rgba(0, 198, 255, 0.4); color: var(--accent-blue); }
+.footer-cta:hover { text-shadow: 0 0 20px rgba(0, 198, 255, 0.4); color: var(--accent-blue); }
 .social-links { display: flex; justify-content: center; gap: 30px; margin-bottom: 50px; }
 .social-icon { font-size: 1.8rem; color: #777; transition: 0.3s; display: flex; align-items: center; justify-content: center; font-weight: 900; text-transform: uppercase; font-family: 'Montserrat', sans-serif; }
-.social-icon:hover, .social-icon.mobile-active { color: var(--accent-orange); transform: translateY(-5px); }
+.social-icon:hover { color: var(--accent-orange); transform: translateY(-5px); }
 .footer-btn { display: inline-block; padding: 18px 50px; border: 2px solid var(--accent-blue); border-radius: 50px; font-size: 1.1rem; text-transform: uppercase; font-weight: 800; letter-spacing: 1px; transition: 0.3s; color: var(--accent-blue); margin-bottom: 50px; background: transparent; }
-.footer-btn:hover, .footer-btn.mobile-active { background: var(--accent-blue); color: #000; box-shadow: 0 0 25px rgba(0, 198, 255, 0.6); }
+.footer-btn:hover { background: var(--accent-blue); color: #000; box-shadow: 0 0 25px rgba(0, 198, 255, 0.6); }
 .copyright { font-size: 0.8rem; color: #444; line-height: 1.6; }
 
 /* Лайтбокс */
@@ -277,25 +266,48 @@ footer { padding: 100px 5%; text-align: center; border-top: 1px solid rgba(255,2
     * { cursor: auto !important; } .cursor { display: none; }
     nav { padding: 20px 3%; } .nav-links { gap: 10px; } .nav-link { font-size: 0.7rem; padding: 4px 8px; }
     
-    /* Hero Mobile */
-    .hero-photo { display: block; height: 50vh; top: 12%; bottom: auto; right: -10%; opacity: 1; z-index: 0; filter: drop-shadow(0 0 10px rgba(0, 198, 255, 0.3)); mask-image: linear-gradient(to bottom, black 85%, transparent 100%); -webkit-mask-image: linear-gradient(to bottom, black 85%, transparent 100%); } 
+    /* 1. Возвращаем иконки в меню */
+    .nav-image-icon { display: block !important; height: 16px; width: auto; filter: grayscale(0%); }
+
+    /* 2. Подгоняем размер логотипа кейса */
+    .category-title img { 
+        height: auto; 
+        max-width: 80vw; /* Не шире 80% экрана */
+        max-height: 60px; 
+    }
+
+    /* 3. Подсветка при скролле (ТОЛЬКО НА МОБИЛЬНОМ) */
     .hero.mobile-active .hero-photo { filter: drop-shadow(0 0 20px rgba(0, 198, 255, 0.6)); }
+    .hero h1.mobile-active { -webkit-text-stroke: 2px var(--accent-blue); color: rgba(0, 198, 255, 0.05); }
+    .marquee-container.mobile-active .marquee-item { color: var(--accent-blue); text-shadow: 0 0 10px rgba(0, 198, 255, 0.5); }
+    .about-photo-frame.mobile-active .about-img-real { filter: drop-shadow(0 0 30px rgba(0, 198, 255, 0.6)); transform: scale(1.03); }
+    .project-item.mobile-active { padding-left: 30px; border-bottom: 1px solid var(--accent-orange); background: linear-gradient(90deg, rgba(255,123,0,0.05), transparent); }
+    .project-item.mobile-active .project-img-title { filter: grayscale(0%); }
+    
+    .zoom-effect.mobile-active { transform: scale(1.05); }
+    .sub-project.mobile-active { border-color: rgba(255, 123, 0, 0.3); background: rgba(255,255,255,0.04); }
+    .gallery-img.mobile-active { opacity: 1; transform: scale(1.03); z-index: 2; border: 1px solid var(--accent-blue); }
+    
+    .nav-link.mobile-active { color: var(--accent-blue); border-color: var(--accent-blue); transform: translateX(-5px); }
+    .footer-cta.mobile-active { text-shadow: 0 0 20px rgba(0, 198, 255, 0.4); color: var(--accent-blue); }
+    .social-icon.mobile-active { color: var(--accent-orange); transform: translateY(-5px); }
+    .footer-btn.mobile-active { background: var(--accent-blue); color: #000; box-shadow: 0 0 25px rgba(0, 198, 255, 0.6); }
+    .project-link-btn.mobile-active { background: var(--accent-blue); color: #000; box-shadow: 0 0 20px rgba(0, 198, 255, 0.6); }
+
+    /* Остальные стили */
+    .hero-photo { display: block; height: 50vh; top: 12%; bottom: auto; right: -10%; opacity: 1; z-index: 0; filter: drop-shadow(0 0 10px rgba(0, 198, 255, 0.3)); mask-image: linear-gradient(to bottom, black 85%, transparent 100%); -webkit-mask-image: linear-gradient(to bottom, black 85%, transparent 100%); } 
     .hero h1 { font-size: 12vw; position: relative; z-index: 10; margin-top: 20vh; text-shadow: 0 0 30px rgba(0,0,0,0.9); }
     
-    /* About Mobile */
     .about-container { flex-direction: column; align-items: center; gap: 30px; }
     .about-photo-frame { width: 80%; min-width: unset; flex: none;}
     .about-content { text-align: center; }
     .marquee-container { width: 100%; margin: 0; }
     .project-item { flex-direction: column; align-items: flex-start; gap: 10px; }
     .footer-cta { font-size: 2rem; }
-    .nav-image-icon { display: none; }
     
-    /* Projects Page Mobile */
     .projects-main-header { font-size: 2.5rem; padding-top: 100px; }
     .project-split-container { flex-direction: column; gap: 30px; }
     .left-gallery-side, .right-description-side { flex: 0 0 100%; }
-    /* На телефоне перестраиваемся в 2 колонки или авто */
     .left-gallery-side { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
     .case-title { font-size: 1.5rem; }
     .case-description { font-size: 1.2rem; }

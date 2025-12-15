@@ -1,6 +1,25 @@
 document.addEventListener('DOMContentLoaded', () => {
     
-    // --- КАСТОМНЫЙ КУРСОР ---
+    // --- 1. МОБИЛЬНАЯ ПОДСВЕТКА ПРИ СКРОЛЛЕ ---
+    // Этот код добавляет класс .mobile-active, когда элемент появляется на экране.
+    // CSS настроен так, что визуально это сработает ТОЛЬКО на ширине < 768px.
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('mobile-active');
+            } else {
+                // Опционально: убираем подсветку, если элемент ушел с экрана
+                entry.target.classList.remove('mobile-active');
+            }
+        });
+    }, { threshold: 0.1 });
+
+    // Элементы, за которыми следим
+    document.querySelectorAll('.hover-target, .project-item, .hero h1, .gallery-img, .sub-project, .project-link-btn, .zoom-effect, .nav-link, .footer-cta, .social-icon, .footer-btn, .about-photo-frame, .hero, .marquee-container').forEach(el => {
+        observer.observe(el);
+    });
+
+    // --- 2. КАСТОМНЫЙ КУРСОР (Работает на ПК) ---
     const cursor = document.getElementById('cursor');
     const hoverTargets = document.querySelectorAll('.hover-target');
 
@@ -14,18 +33,16 @@ document.addEventListener('DOMContentLoaded', () => {
         target.addEventListener('mouseleave', () => cursor.classList.remove('hovered'));
     });
 
-    // --- ЛАЙТБОКС (СКОУП ПО КЕЙСУ) ---
+    // --- 3. ЛАЙТБОКС (ГАЛЕРЕЯ) ---
     const lightbox = document.getElementById('lightbox-modal');
     const lightboxImg = document.getElementById('lightbox-img');
     const closeBtn = document.getElementById('lightbox-close');
     const prevBtn = document.getElementById('lightbox-prev');
     const nextBtn = document.getElementById('lightbox-next');
     
-    // Переменные для хранения текущего набора картинок
     let currentGalleryGroup = []; 
     let currentIndex = 0;
 
-    // Функция открытия лайтбокса
     function openLightbox(index) {
         currentIndex = index;
         updateImage();
@@ -33,7 +50,6 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.style.overflow = 'hidden'; 
     }
 
-    // Обновление картинки src
     function updateImage() {
         if (currentGalleryGroup.length > 0) {
             lightboxImg.src = currentGalleryGroup[currentIndex].src;
@@ -43,46 +59,34 @@ document.addEventListener('DOMContentLoaded', () => {
     function closeLightbox() {
         lightbox.classList.remove('active');
         document.body.style.overflow = '';
-        currentGalleryGroup = []; // Очищаем группу при закрытии
+        currentGalleryGroup = []; 
     }
 
-    // ЛОГИКА ЗАЦИКЛЕННОСТИ ВНУТРИ ГРУППЫ
     function showNext() {
         if (currentGalleryGroup.length === 0) return;
-        // % позволяет вернуться к 0, когда доходим до конца
         currentIndex = (currentIndex + 1) % currentGalleryGroup.length;
         updateImage();
     }
 
     function showPrev() {
         if (currentGalleryGroup.length === 0) return;
-        // + length позволяет корректно уходить с 0 на последний элемент
         currentIndex = (currentIndex - 1 + currentGalleryGroup.length) % currentGalleryGroup.length;
         updateImage();
     }
 
-    // Находим все картинки
     const allImages = document.querySelectorAll('.gallery-img');
 
     allImages.forEach(img => {
         img.addEventListener('click', (e) => {
-            // 1. Находим контейнер (родителя), в котором лежит эта картинка
             const parentContainer = e.target.closest('.left-gallery-side');
-            
-            // 2. Если родитель найден, собираем ВСЕ картинки только внутри него
             if (parentContainer) {
                 currentGalleryGroup = Array.from(parentContainer.querySelectorAll('.gallery-img'));
-                
-                // 3. Определяем номер нажатой картинки внутри этой группы
                 const indexClicked = currentGalleryGroup.indexOf(e.target);
-                
-                // 4. Открываем
                 openLightbox(indexClicked);
             }
         });
     });
 
-    // Управление кнопками
     closeBtn.addEventListener('click', closeLightbox);
     nextBtn.addEventListener('click', (e) => { e.stopPropagation(); showNext(); });
     prevBtn.addEventListener('click', (e) => { e.stopPropagation(); showPrev(); });

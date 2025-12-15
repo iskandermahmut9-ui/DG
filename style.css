@@ -303,7 +303,27 @@ footer { padding: 100px 5%; text-align: center; border-top: 1px solid rgba(255,2
     .about-content { text-align: center; }
     .marquee-container { width: 100%; margin: 0; }
     .project-item { flex-direction: column; align-items: flex-start; gap: 10px; }
-    .footer-cta { font-size: 2rem; }
+    /* --- Обновленный стиль для CTA в футере --- */
+.footer-cta { 
+    font-size: 4vw; 
+    font-weight: 900; 
+    margin-bottom: 40px; 
+    line-height: 1.2; 
+    color: #fff; 
+    text-transform: uppercase; 
+    letter-spacing: 2px; 
+    transition: 0.3s;
+    
+    /* Новые свойства для ссылки: */
+    text-decoration: none; /* Убираем подчеркивание */
+    display: inline-block; /* Чтобы работали отступы */
+    cursor: pointer;       /* Курсор-рука (если вдруг JS не сработает) */
+}
+
+.footer-cta:hover, .footer-cta.mobile-active { 
+    text-shadow: 0 0 20px rgba(0, 198, 255, 0.4); 
+    color: var(--accent-blue); 
+}
     
     .projects-main-header { font-size: 2.5rem; padding-top: 100px; }
     .project-split-container { flex-direction: column; gap: 30px; }

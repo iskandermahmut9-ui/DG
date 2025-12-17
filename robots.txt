@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+Host: https://d-gavrilenko.ru
+Sitemap: https://d-gavrilenko.ru/sitemap.xml

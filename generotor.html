@@ -3,17 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AI Carousel Studio Ultimate v7.0 (History & Slide Tools)</title>
+    <title>AI Carousel Studio Ultimate v11.0 (Text Boundaries)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     
-    <!-- Подключение 10 популярных шрифтов -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Lato:wght@400;700&family=Merriweather:wght@700&family=Montserrat:wght@400;700;900&family=Open+Sans:wght@600&family=Oswald:wght@700&family=Playfair+Display:wght@700&family=Poppins:wght@600&family=PT+Sans:wght@700&family=Raleway:wght@700&family=Roboto:wght@700&display=swap" rel="stylesheet">
     
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #0f172a; color: #f8fafc; overscroll-behavior: none; }
         
-        /* Сетка редактора */
         .editor-container { 
             display: flex; 
             flex-direction: column; 
@@ -45,7 +43,6 @@
         .slide-card:hover { background-color: #334155; }
         .slide-card.active { border-color: #ea580c; background-color: #1e293b; }
         
-        /* Кнопки управления слайдом */
         .slide-controls button { opacity: 0.6; transition: opacity 0.2s; }
         .slide-controls button:hover { opacity: 1; color: #ea580c; }
         
@@ -57,23 +54,49 @@
         .dropdown-menu { display: none; }
         .dropdown-menu.show { display: block; animation: fadeIn 0.2s; }
         
-        .sticker-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; max-height: 250px; overflow-y: auto; padding: 4px; }
-        .sticker-item { cursor: pointer; border-radius: 8px; padding: 8px; background: #1e293b; transition: all 0.2s; display: flex; align-items: center; justify-content: center; font-size: 24px; }
-        .sticker-item:hover { background: #334155; transform: scale(1.1); }
+        .sticker-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; max-height: 250px; overflow-y: auto; padding: 4px; }
+        .sticker-item { 
+            cursor: pointer; border-radius: 8px; padding: 6px; 
+            background: #1e293b; transition: all 0.2s; 
+            display: flex; align-items: center; justify-content: center; 
+            font-size: 28px; line-height: 1;
+        }
+        .sticker-item:hover { background: #334155; transform: scale(1.15); z-index: 10; }
+
+        .bg-presets-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; max-height: 120px; overflow-y: auto; margin-top: 8px; }
+        .bg-preset-item { aspect-ratio: 1; border-radius: 4px; border: 1px solid #334155; cursor: pointer; background-size: cover; background-position: center; position: relative;}
+        .bg-preset-item:hover { border-color: #ea580c; }
+        .bg-delete-btn { position: absolute; top: -4px; right: -4px; background: red; color: white; width: 12px; height: 12px; border-radius: 50%; font-size: 8px; display: flex; align-items: center; justify-content: center; }
 
         #toast { visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center; border-radius: 8px; padding: 16px; position: fixed; z-index: 100; left: 50%; bottom: 80px; transform: translateX(-50%); font-size: 14px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         #toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
         
         .tab-btn.active { color: #ea580c; border-bottom: 2px solid #ea580c; }
         .filter-btn.active { background-color: #ea580c; color: white; border-color: #ea580c; }
+        
+        .text-settings-panel {
+            background: #1e293b;
+            border-top: 1px solid #334155;
+            padding-top: 8px;
+            margin-top: 8px;
+            display: none;
+        }
+        .text-settings-panel.open { display: block; animation: slideDown 0.2s; }
 
         @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 80px; opacity: 1;} }
         @keyframes fadeout { from {bottom: 80px; opacity: 1;} to {bottom: 0; opacity: 0;} }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideDown { from { height: 0; opacity: 0; } to { height: auto; opacity: 1; } }
+        
+        #loader { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 200; align-items: center; justify-content: center; flex-direction: column; color: white; }
     </style>
 </head>
 <body class="overflow-hidden fixed inset-0">
 
+    <div id="loader">
+        <div class="text-2xl font-bold mb-2">Генерация PDF...</div>
+        <div class="text-sm text-slate-400">Пожалуйста, подождите</div>
+    </div>
     <div id="toast">Уведомление</div>
 
     <header class="h-16 bg-slate-900 border-b border-slate-800 px-4 md:px-6 flex justify-between items-center z-50 relative shrink-0">
@@ -85,7 +108,6 @@
             <button onclick="deleteSelected()" class="p-2 hover:bg-orange-900/50 rounded-full text-slate-400 hover:text-orange-500 transition-colors" title="Удалить объект">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
             </button>
-            
             <button onclick="saveProjectToStorage()" class="hidden md:flex items-center gap-2 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg text-xs font-bold transition-all border border-slate-700">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path></svg>
                 Сохр.
@@ -113,7 +135,6 @@
         </div>
     </header>
 
-    <!-- Мобильные табы -->
     <div id="mobileTabs" class="flex h-[46px] bg-slate-900 border-b border-slate-800 text-[10px] font-bold uppercase tracking-wider shrink-0 z-40 md:hidden">
         <button onclick="switchTab('slides')" id="tab-slides" class="tab-btn flex-1 text-slate-400 hover:text-white border-b-2 border-transparent transition-all">Слайды</button>
         <button onclick="switchTab('canvas')" id="tab-canvas" class="tab-btn active flex-1 text-orange-500 border-b-2 border-orange-500 transition-all">Холст</button>
@@ -121,7 +142,6 @@
     </div>
 
     <div class="editor-container relative">
-        <!-- ЛЕВАЯ ПАНЕЛЬ -->
         <aside id="leftPanel" class="bg-slate-900 border-r border-slate-800 flex-col custom-scrollbar overflow-y-auto hidden md:flex w-full md:w-auto h-full absolute md:relative z-30">
             <div class="p-4">
                 <button onclick="addSlide()" class="w-full bg-slate-800 hover:bg-slate-700 py-3 rounded-lg text-xs font-bold uppercase tracking-wider border border-slate-700 transition-all text-orange-500 border-orange-500/20 hover:border-orange-500 shadow-lg">+ Новый Слайд</button>
@@ -133,19 +153,16 @@
             <div id="slideList" class="px-4 pb-4 space-y-3"></div>
         </aside>
 
-        <!-- ЦЕНТРАЛЬНАЯ ОБЛАСТЬ -->
         <main id="mainArea" class="relative flex items-center justify-center p-4 md:p-8 bg-slate-950 overflow-hidden w-full h-full">
             <canvas id="mainCanvas"></canvas>
             <div class="absolute bottom-4 text-slate-500 text-[10px] font-mono pointer-events-none opacity-50">
-                <span class="text-orange-400">Smart Touch Engine</span> v7.0
+                <span class="text-orange-400">Smart Design AI</span> v11.0
             </div>
         </main>
 
-        <!-- ПРАВАЯ ПАНЕЛЬ -->
         <aside id="rightPanel" class="bg-slate-900 border-l border-slate-800 flex-col overflow-y-auto custom-scrollbar hidden md:flex w-full md:w-auto h-full absolute md:relative z-30 pb-20 md:pb-0">
             <div class="p-5 space-y-8">
                 
-                <!-- Контроль объекта -->
                 <div id="objectControls" class="hidden space-y-2 bg-slate-800 p-3 rounded border border-orange-500/30 sticky top-0 z-20 shadow-lg">
                     <div class="flex justify-between text-[10px] text-orange-400 font-bold">
                         <span>Размер объекта</span>
@@ -158,51 +175,139 @@
                     </div>
                 </div>
 
-                <!-- ТЕКСТ -->
                 <div class="space-y-4">
                     <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest border-b border-slate-800 pb-1 block">Типографика</label>
                     
-                    <!-- Заголовок -->
-                    <div class="bg-slate-800/50 p-2 rounded border border-slate-700 hover:border-slate-600 transition-colors">
+                    <!-- TITLE -->
+                     <div class="bg-slate-800/50 p-2 rounded border border-slate-700 hover:border-slate-600 transition-colors">
                         <div class="flex justify-between mb-1 items-center">
                             <span class="text-[10px] font-bold text-orange-400">ЗАГОЛОВОК</span>
-                            <input type="color" id="mainColor" onchange="saveState()" oninput="updateColor('colorMain', this.value)" class="w-5 h-5 rounded cursor-pointer bg-transparent border-none p-0">
+                            <div class="flex gap-2 items-center">
+                                <button onclick="toggleTextSettings('main')" class="text-[10px] text-slate-400 hover:text-white bg-slate-800 px-1.5 py-0.5 rounded border border-slate-600">⚙️ Настр.</button>
+                                <input type="color" id="mainColor" onchange="saveState()" oninput="updateColor('colorMain', this.value)" class="w-5 h-5 rounded cursor-pointer bg-transparent border-none p-0">
+                            </div>
                         </div>
                         <input type="text" id="textInput" onchange="saveState()" oninput="saveAndRender()" class="w-full bg-slate-800 border border-slate-700 rounded p-1.5 text-sm font-bold mb-2 focus:border-orange-500 outline-none text-white" placeholder="Заголовок">
                         <div class="flex gap-1 items-center">
                             <select id="fontSelectMain" onchange="saveAndRender(); saveState()" class="font-selector w-2/3 bg-slate-800 border border-slate-700 rounded p-1 text-[10px] h-8 text-slate-300 outline-none"></select>
                             <input type="range" id="fontSizeSlider" min="20" max="300" value="100" class="w-1/3 h-4" oninput="saveAndRender()" onchange="saveState()" title="Размер">
                         </div>
+                        
+                        <!-- Main Text Settings Panel -->
+                        <div id="settings-main" class="text-settings-panel">
+                             <div class="flex items-center gap-2 mb-2">
+                                <span class="text-[9px] text-slate-500 w-16">Ширина:</span>
+                                <input type="range" id="textMaxWidth" min="100" max="1000" value="800" class="w-full h-2" oninput="saveAndRender()" onchange="saveState()">
+                            </div>
+                            <div class="flex items-center justify-between mb-2 border-t border-slate-700 pt-2">
+                                <span class="text-[10px] text-slate-400">Стиль фона</span>
+                                <input type="checkbox" id="mainBgShow" onchange="saveAndRender(); saveState()" class="accent-orange-500">
+                            </div>
+                            <div class="flex flex-col gap-2">
+                                <div class="flex gap-2">
+                                    <select id="mainBgType" onchange="saveAndRender(); saveState()" class="w-2/3 bg-slate-900 border border-slate-600 rounded text-[10px] p-1 text-slate-300">
+                                        <option value="fill">Заливка</option>
+                                        <option value="stroke">Контур</option>
+                                        <option value="bracket">Скобки [ ]</option>
+                                        <option value="marker">Маркер</option>
+                                        <option value="underline">Подчеркивание</option>
+                                    </select>
+                                    <input type="color" id="mainBgColor" oninput="saveAndRender()" onchange="saveState()" class="w-1/3 h-6 bg-transparent border-none">
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-[9px] text-slate-500">Отступ</span>
+                                    <input type="range" id="mainBgPadding" min="0" max="100" value="20" class="w-full h-2" oninput="saveAndRender()" onchange="saveState()">
+                                </div>
+                            </div>
+                        </div>
                     </div>
-
-                    <!-- Подзаголовок -->
+                    
+                    <!-- SUBTITLE -->
                     <div class="bg-slate-800/50 p-2 rounded border border-slate-700 hover:border-slate-600 transition-colors">
                         <div class="flex justify-between mb-1 items-center">
                             <span class="text-[10px] font-bold text-slate-400">ПОДЗАГОЛОВОК</span>
-                            <input type="color" id="subColor" onchange="saveState()" oninput="updateColor('colorSub', this.value)" class="w-5 h-5 rounded cursor-pointer bg-transparent border-none p-0">
+                            <div class="flex gap-2 items-center">
+                                <button onclick="toggleTextSettings('sub')" class="text-[10px] text-slate-400 hover:text-white bg-slate-800 px-1.5 py-0.5 rounded border border-slate-600">⚙️ Настр.</button>
+                                <input type="color" id="subColor" onchange="saveState()" oninput="updateColor('colorSub', this.value)" class="w-5 h-5 rounded cursor-pointer bg-transparent border-none p-0">
+                            </div>
                         </div>
                         <input type="text" id="subInput" onchange="saveState()" oninput="saveAndRender()" class="w-full bg-slate-800 border border-slate-700 rounded p-1.5 text-xs mb-2 focus:border-orange-500 outline-none text-white" placeholder="Подзаголовок">
                         <div class="flex gap-1 items-center">
                             <select id="fontSelectSub" onchange="saveAndRender(); saveState()" class="font-selector w-2/3 bg-slate-800 border border-slate-700 rounded p-1 text-[10px] h-8 text-slate-300 outline-none"></select>
                             <input type="range" id="subSizeSlider" min="10" max="150" value="40" class="w-1/3 h-4" oninput="saveAndRender()" onchange="saveState()">
                         </div>
+                        
+                        <div id="settings-sub" class="text-settings-panel">
+                             <div class="flex items-center gap-2 mb-2">
+                                <span class="text-[9px] text-slate-500 w-16">Ширина:</span>
+                                <input type="range" id="subMaxWidth" min="100" max="1000" value="800" class="w-full h-2" oninput="saveAndRender()" onchange="saveState()">
+                            </div>
+                            <div class="flex items-center justify-between mb-2 border-t border-slate-700 pt-2">
+                                <span class="text-[10px] text-slate-400">Стиль фона</span>
+                                <input type="checkbox" id="subBgShow" onchange="saveAndRender(); saveState()" class="accent-orange-500">
+                            </div>
+                            <div class="flex flex-col gap-2">
+                                <div class="flex gap-2">
+                                    <select id="subBgType" onchange="saveAndRender(); saveState()" class="w-2/3 bg-slate-900 border border-slate-600 rounded text-[10px] p-1 text-slate-300">
+                                        <option value="fill">Заливка</option>
+                                        <option value="stroke">Контур</option>
+                                        <option value="bracket">Скобки [ ]</option>
+                                        <option value="marker">Маркер</option>
+                                        <option value="underline">Подчеркивание</option>
+                                    </select>
+                                    <input type="color" id="subBgColor" oninput="saveAndRender()" onchange="saveState()" class="w-1/3 h-6 bg-transparent border-none">
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-[9px] text-slate-500">Отступ</span>
+                                    <input type="range" id="subBgPadding" min="0" max="100" value="10" class="w-full h-2" oninput="saveAndRender()" onchange="saveState()">
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
-                    <!-- Основной текст -->
+                    <!-- BODY -->
                     <div class="bg-slate-800/50 p-2 rounded border border-slate-700 hover:border-slate-600 transition-colors">
                         <div class="flex justify-between mb-1 items-center">
                             <span class="text-[10px] font-bold text-slate-400">ОСНОВНОЙ ТЕКСТ</span>
-                            <input type="color" id="bodyColor" onchange="saveState()" oninput="updateColor('colorBody', this.value)" class="w-5 h-5 rounded cursor-pointer bg-transparent border-none p-0">
+                            <div class="flex gap-2 items-center">
+                                <button onclick="toggleTextSettings('body')" class="text-[10px] text-slate-400 hover:text-white bg-slate-800 px-1.5 py-0.5 rounded border border-slate-600">⚙️ Настр.</button>
+                                <input type="color" id="bodyColor" onchange="saveState()" oninput="updateColor('colorBody', this.value)" class="w-5 h-5 rounded cursor-pointer bg-transparent border-none p-0">
+                            </div>
                         </div>
                         <textarea id="bodyInput" onchange="saveState()" oninput="saveAndRender()" class="w-full bg-slate-800 border border-slate-700 rounded p-1.5 text-xs h-16 mb-2 focus:border-orange-500 outline-none text-white resize-none" placeholder="Текст..."></textarea>
                         <div class="flex gap-1 items-center">
                             <select id="fontSelectBody" onchange="saveAndRender(); saveState()" class="font-selector w-2/3 bg-slate-800 border border-slate-700 rounded p-1 text-[10px] h-8 text-slate-300 outline-none"></select>
                             <input type="range" id="bodySizeSlider" min="10" max="100" value="24" class="w-1/3 h-4" oninput="saveAndRender()" onchange="saveState()">
                         </div>
+
+                        <div id="settings-body" class="text-settings-panel">
+                             <div class="flex items-center gap-2 mb-2">
+                                <span class="text-[9px] text-slate-500 w-16">Ширина:</span>
+                                <input type="range" id="bodyMaxWidth" min="100" max="1000" value="800" class="w-full h-2" oninput="saveAndRender()" onchange="saveState()">
+                            </div>
+                            <div class="flex items-center justify-between mb-2 border-t border-slate-700 pt-2">
+                                <span class="text-[10px] text-slate-400">Стиль фона</span>
+                                <input type="checkbox" id="bodyBgShow" onchange="saveAndRender(); saveState()" class="accent-orange-500">
+                            </div>
+                            <div class="flex flex-col gap-2">
+                                <div class="flex gap-2">
+                                    <select id="bodyBgType" onchange="saveAndRender(); saveState()" class="w-2/3 bg-slate-900 border border-slate-600 rounded text-[10px] p-1 text-slate-300">
+                                        <option value="fill">Заливка</option>
+                                        <option value="stroke">Контур</option>
+                                        <option value="bracket">Скобки [ ]</option>
+                                        <option value="marker">Маркер</option>
+                                    </select>
+                                    <input type="color" id="bodyBgColor" oninput="saveAndRender()" onchange="saveState()" class="w-1/3 h-6 bg-transparent border-none">
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-[9px] text-slate-500">Отступ</span>
+                                    <input type="range" id="bodyBgPadding" min="0" max="100" value="10" class="w-full h-2" oninput="saveAndRender()" onchange="saveState()">
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <!-- ИНФОГРАФИКА -->
                 <div class="space-y-3 pt-4 border-t border-slate-800">
                     <div class="flex justify-between items-center">
                         <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Инфографика</label>
@@ -219,24 +324,12 @@
                     </div>
                 </div>
 
-                <!-- СТИКЕРЫ -->
                 <div class="space-y-3 pt-4 border-t border-slate-800">
-                    <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Стикеры</label>
-                    <div class="flex gap-2 flex-wrap">
-                        <button onclick="loadStickerCategory('popular')" class="text-[10px] bg-slate-800 hover:bg-slate-700 px-2 py-1 rounded text-slate-300 border border-slate-700">🔥 Топ</button>
-                        <button onclick="loadStickerCategory('shapes')" class="text-[10px] bg-slate-800 hover:bg-slate-700 px-2 py-1 rounded text-slate-300 border border-slate-700">Фигуры</button>
-                        <button onclick="loadStickerCategory('arrows')" class="text-[10px] bg-slate-800 hover:bg-slate-700 px-2 py-1 rounded text-slate-300 border border-slate-700">Стрелки</button>
-                        <button onclick="loadStickerCategory('social')" class="text-[10px] bg-slate-800 hover:bg-slate-700 px-2 py-1 rounded text-slate-300 border border-slate-700">Соцсети</button>
-                    </div>
-                    <div id="stickerResults" class="sticker-grid custom-scrollbar bg-slate-900 border border-slate-800 rounded-lg"></div>
-                </div>
-
-                <!-- ФОН -->
-                <div class="space-y-3 pt-4 border-t border-slate-800">
-                    <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Медиа</label>
-                    <div class="grid grid-cols-2 gap-2">
+                    <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Медиа и Фоны</label>
+                    
+                    <div class="grid grid-cols-2 gap-2 mb-2">
                         <label class="cursor-pointer bg-slate-800 hover:bg-slate-700 py-3 rounded text-center text-[10px] font-bold border border-slate-700 hover:border-orange-500/50 transition-colors text-slate-300">
-                            🖼 Фон
+                            🖼 Загрузить Фон
                             <input type="file" accept="image/*" class="hidden" onchange="handleBgUpload(event)">
                         </label>
                          <label class="cursor-pointer bg-blue-900/10 hover:bg-blue-900/30 py-3 rounded text-center text-[10px] font-bold border border-blue-800/30 hover:border-blue-500/50 text-blue-400 transition-colors">
@@ -244,12 +337,29 @@
                             <input type="file" accept="image/*" class="hidden" onchange="handleLogoUpload(event)">
                         </label>
                     </div>
+
+                    <button id="saveBgBtn" onclick="saveCurrentBgAsPreset()" class="hidden w-full bg-slate-700 hover:bg-slate-600 text-[10px] py-1 rounded text-slate-200 border border-slate-600 mb-2">💾 Сохранить текущий фон в пресеты</button>
+
+                    <label class="text-[9px] text-slate-500">Мои фоны (Пресеты)</label>
+                    <div id="bgPresets" class="bg-presets-grid custom-scrollbar"></div>
                 </div>
 
-                <!-- РАМКИ И ЭФФЕКТЫ -->
+                <div class="space-y-3 pt-4 border-t border-slate-800">
+                    <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Стикеры</label>
+                    <div class="flex gap-2 flex-wrap">
+                        <button onclick="loadStickerCategory('popular')" class="text-[10px] bg-slate-800 hover:bg-slate-700 px-2 py-1 rounded text-slate-300 border border-slate-700">🔥 Топ</button>
+                        <button onclick="loadStickerCategory('business')" class="text-[10px] bg-slate-800 hover:bg-slate-700 px-2 py-1 rounded text-slate-300 border border-slate-700">Бизнес</button>
+                        <button onclick="loadStickerCategory('shapes')" class="text-[10px] bg-slate-800 hover:bg-slate-700 px-2 py-1 rounded text-slate-300 border border-slate-700">Фигуры</button>
+                        <button onclick="loadStickerCategory('social')" class="text-[10px] bg-slate-800 hover:bg-slate-700 px-2 py-1 rounded text-slate-300 border border-slate-700">Соцсети</button>
+                         <button onclick="loadStickerCategory('arrows')" class="text-[10px] bg-slate-800 hover:bg-slate-700 px-2 py-1 rounded text-slate-300 border border-slate-700">Стрелки</button>
+                         <button onclick="loadStickerCategory('numbers')" class="text-[10px] bg-slate-800 hover:bg-slate-700 px-2 py-1 rounded text-slate-300 border border-slate-700">123</button>
+                    </div>
+                    <div id="stickerResults" class="sticker-grid custom-scrollbar bg-slate-900 border border-slate-800 rounded-lg"></div>
+                </div>
+
                 <details class="pt-4 border-t border-slate-800 pb-10" open>
                     <summary class="text-[10px] font-black text-slate-500 uppercase tracking-widest cursor-pointer mb-2 flex justify-between items-center group">
-                        Рамки и Эффекты
+                        Рамки Слайда
                         <span class="text-orange-500 group-hover:rotate-180 transition-transform">▼</span>
                     </summary>
                     <div class="space-y-3 pl-2">
@@ -257,9 +367,19 @@
                              <span class="text-[10px] text-slate-500">Стиль рамки</span>
                              <select id="frameType" onchange="saveAndRender(); saveState()" class="w-full bg-slate-800 border border-slate-700 rounded p-1.5 text-xs text-slate-300 outline-none"><option value="none">Без рамки</option><option value="simple">Простая</option><option value="offset">Смещенная</option><option value="neon">Неон</option></select>
                          </div>
+                         <div class="grid grid-cols-2 gap-2">
+                             <div class="space-y-1">
+                                 <span class="text-[10px] text-slate-500">Отступ</span>
+                                 <input type="range" id="framePadding" min="0" max="200" value="40" class="w-full h-4" oninput="saveAndRender()" onchange="saveState()">
+                             </div>
+                             <div class="space-y-1">
+                                 <span class="text-[10px] text-slate-500">Толщина</span>
+                                 <input type="range" id="frameThickness" min="1" max="50" value="10" class="w-full h-4" oninput="saveAndRender()" onchange="saveState()">
+                             </div>
+                         </div>
                          <div class="space-y-1">
-                             <span class="text-[10px] text-slate-500">Отступ рамки</span>
-                             <input type="range" id="framePadding" min="0" max="200" value="40" class="w-full h-4" oninput="saveAndRender()" onchange="saveState()">
+                             <span class="text-[10px] text-slate-500">Закругление</span>
+                             <input type="range" id="frameRadius" min="0" max="150" value="0" class="w-full h-4" oninput="saveAndRender()" onchange="saveState()">
                          </div>
                          <div class="space-y-1">
                              <span class="text-[10px] text-slate-500">Цвет рамки</span>
@@ -282,10 +402,7 @@
         const ctx = canvas.getContext('2d');
         const SCALE = 2; // High DPI
 
-        const POPULAR_FONTS = [
-            "Montserrat", "Inter", "Roboto", "Open Sans", "Lato", 
-            "Oswald", "Poppins", "Raleway", "Merriweather", "Playfair Display"
-        ];
+        const POPULAR_FONTS = ["Montserrat", "Inter", "Roboto", "Open Sans", "Lato", "Oswald", "Poppins", "Raleway", "Merriweather", "Playfair Display"];
 
         let config = {
             width: 1080, height: 1080,
@@ -294,22 +411,22 @@
             drag: { active: false, target: null, offsetX: 0, offsetY: 0 },
             selected: null, 
             effects: { grain: false, retro: false, vignette: false },
-            frame: { type: 'none', padding: 40, color: '#ffffff' },
+            frame: { type: 'none', padding: 40, thickness: 10, radius: 0, color: '#ffffff' },
             guides: { x: null, y: null },
-            // History
             history: [],
-            historyIndex: -1
+            historyIndex: -1,
+            bgPresets: []
         };
 
-        // --- Init ---
         window.onload = () => {
             populateFontSelectors();
-            if (localStorage.getItem('carousel_project_v7')) {
+            loadBgPresets();
+            if (localStorage.getItem('carousel_project_v11')) {
                 loadProjectFromStorage();
             } else {
-                addSlide(false); // don't save state on initial add
+                addSlide(false); 
                 changeFormat('1:1');
-                saveState(); // Initial State
+                saveState(); 
             }
             switchTab('canvas');
             loadStickerCategory('popular');
@@ -318,10 +435,7 @@
                 if(e.key === 'Delete' || e.key === 'Backspace') {
                     if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') deleteSelected();
                 }
-                if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
-                    e.preventDefault();
-                    undo();
-                }
+                if ((e.ctrlKey || e.metaKey) && e.key === 'z') { e.preventDefault(); undo(); }
             });
         };
 
@@ -338,250 +452,114 @@
             const cy = config.height / 2;
             return {
                 bgType: 'color', bgVal: '#1e293b', bgImg: null, bgPos: {x: 0, y: 0},
+                
+                // Text Objects with Enhanced Backgrounds AND Width
                 text: "ЗАГОЛОВОК", fontMain: "Montserrat", colorMain: "#ffffff", fontSize: 100, textPos: { x: cx, y: cy - 200 },
+                textBg: { show: false, color: '#000000', type: 'fill', padding: 20 }, textMaxWidth: 800,
+                
                 sub: "ПОДЗАГОЛОВОК", fontSub: "Inter", colorSub: "#cbd5e1", subSize: 40, subPos: { x: cx, y: cy - 100 },
+                subBg: { show: false, color: '#000000', type: 'fill', padding: 10 }, subMaxWidth: 800,
+                
                 body: "Здесь находится ваш основной текст. Он может быть длинным и автоматически переноситься.", fontBody: "Open Sans", colorBody: "#94a3b8", bodySize: 30, bodyPos: { x: cx, y: cy + 50 },
+                bodyBg: { show: false, color: '#000000', type: 'fill', padding: 10 }, bodyMaxWidth: 800,
+
                 logos: [], stickers: [],
                 chart: { visible: false, type: 'bar', labels: "Q1, Q2, Q3, Q4", data: "25, 60, 45, 80", colors: "#ea580c", scale: 1, pos: { x: cx, y: config.height - 250 } }
             };
         }
 
-        // --- HISTORY SYSTEM (UNDO) ---
+        // --- History ---
         function cloneSlideState(slide) {
-            // Deep clone simple data, preserve Image references
             const clone = JSON.parse(JSON.stringify(slide));
-            clone.bgImg = slide.bgImg; // Restore ref
+            clone.bgImg = slide.bgImg; 
             clone.logos = clone.logos.map((l, i) => ({...l, img: slide.logos[i].img}));
             clone.stickers = clone.stickers.map((s, i) => ({...s, img: slide.stickers[i].img}));
             return clone;
         }
 
         function saveState() {
-            // Cut off future history if we were in the middle
-            if (config.historyIndex < config.history.length - 1) {
-                config.history = config.history.slice(0, config.historyIndex + 1);
-            }
-            
-            // Clone current state
-            const state = {
-                slides: config.slides.map(s => cloneSlideState(s)),
-                width: config.width,
-                height: config.height,
-                frame: {...config.frame},
-                effects: {...config.effects},
-                currentIdx: config.currentIdx
-            };
-            
-            config.history.push(state);
-            config.historyIndex++;
-            
-            // Limit history
-            if (config.history.length > 30) {
-                config.history.shift();
-                config.historyIndex--;
-            }
+            if (config.historyIndex < config.history.length - 1) config.history = config.history.slice(0, config.historyIndex + 1);
+            const state = { slides: config.slides.map(s => cloneSlideState(s)), width: config.width, height: config.height, frame: {...config.frame}, effects: {...config.effects}, currentIdx: config.currentIdx };
+            config.history.push(state); config.historyIndex++;
+            if (config.history.length > 30) { config.history.shift(); config.historyIndex--; }
         }
 
         function undo() {
             if (config.historyIndex > 0) {
                 config.historyIndex--;
                 const state = config.history[config.historyIndex];
-                
-                // Restore State
-                config.width = state.width;
-                config.height = state.height;
-                config.frame = {...state.frame};
-                config.effects = {...state.effects};
-                config.slides = state.slides.map(s => cloneSlideState(s)); // Re-clone to avoid ref issues
-                config.currentIdx = state.currentIdx;
-                
-                // Restore UI
+                config.width = state.width; config.height = state.height; config.frame = {...state.frame}; config.effects = {...state.effects}; config.slides = state.slides.map(s => cloneSlideState(s)); config.currentIdx = state.currentIdx;
                 if(config.currentIdx >= config.slides.length) config.currentIdx = config.slides.length - 1;
-                renderSlideList();
-                loadUIFromSlide();
-                draw();
-                showToast("Отмена действия");
-            } else {
-                showToast("Нечего отменять");
+                renderSlideList(); loadUIFromSlide(); draw(); showToast("Отмена действия");
             }
         }
 
         // --- Slide Management ---
         function addSlide(shouldSave = true) {
             const newSlide = createSlide();
-            if(config.slides.length > 0) {
-                const prev = config.slides[config.slides.length-1];
-                newSlide.bgImg = prev.bgImg; // inherit BG
-            }
-            config.slides.push(newSlide); 
-            selectSlide(config.slides.length - 1); 
-            if(shouldSave) {
-                saveState();
-                showToast("Слайд добавлен");
-            }
+            if(config.slides.length > 0) { const prev = config.slides[config.slides.length-1]; newSlide.bgImg = prev.bgImg; }
+            config.slides.push(newSlide); selectSlide(config.slides.length - 1); 
+            if(shouldSave) { saveState(); showToast("Слайд добавлен"); }
         }
-        
         function duplicateSlide(idx) {
-            const source = config.slides[idx];
-            const copy = cloneSlideState(source);
-            config.slides.splice(idx + 1, 0, copy);
-            selectSlide(idx + 1);
-            saveState();
-            showToast("Слайд скопирован");
+            const source = config.slides[idx]; const copy = cloneSlideState(source);
+            config.slides.splice(idx + 1, 0, copy); selectSlide(idx + 1); saveState(); showToast("Слайд скопирован");
         }
-
         function moveSlide(idx, dir) {
-            if (dir === -1 && idx > 0) {
-                [config.slides[idx], config.slides[idx-1]] = [config.slides[idx-1], config.slides[idx]];
-                selectSlide(idx - 1);
-            } else if (dir === 1 && idx < config.slides.length - 1) {
-                [config.slides[idx], config.slides[idx+1]] = [config.slides[idx+1], config.slides[idx]];
-                selectSlide(idx + 1);
-            } else {
-                return;
-            }
-            saveState();
-            renderSlideList(); // Force re-render list order
+            if (dir === -1 && idx > 0) { [config.slides[idx], config.slides[idx-1]] = [config.slides[idx-1], config.slides[idx]]; selectSlide(idx - 1); } 
+            else if (dir === 1 && idx < config.slides.length - 1) { [config.slides[idx], config.slides[idx+1]] = [config.slides[idx+1], config.slides[idx]]; selectSlide(idx + 1); } 
+            else { return; }
+            saveState(); renderSlideList();
         }
-
         function deleteSelected() {
             if (config.selected) {
-                // Delete Object
                 const s = config.slides[config.currentIdx];
-                if(config.selected.startsWith('sticker-')) {
-                    s.stickers.splice(parseInt(config.selected.split('-')[1]), 1);
-                } else if(config.selected.startsWith('logo-')) {
-                    s.logos.splice(parseInt(config.selected.split('-')[1]), 1);
-                } else if(config.selected === 'chart') {
-                    s.chart.visible = false;
-                    document.getElementById('showChart').checked = false;
-                }
-                config.selected = null; 
-                document.getElementById('objectControls').classList.add('hidden');
-                draw();
-                saveState();
+                if(config.selected.startsWith('sticker-')) s.stickers.splice(parseInt(config.selected.split('-')[1]), 1);
+                else if(config.selected.startsWith('logo-')) s.logos.splice(parseInt(config.selected.split('-')[1]), 1);
+                else if(config.selected === 'chart') { s.chart.visible = false; document.getElementById('showChart').checked = false; }
+                config.selected = null; document.getElementById('objectControls').classList.add('hidden'); draw(); saveState();
             } else {
-                // Delete Slide (if > 1)
-                if(config.slides.length > 1) {
-                    config.slides.splice(config.currentIdx, 1);
-                    if(config.currentIdx >= config.slides.length) config.currentIdx = config.slides.length - 1;
-                    selectSlide(config.currentIdx);
-                    saveState();
-                    showToast("Слайд удален");
-                } else {
-                    showToast("Нельзя удалить последний слайд");
-                }
+                if(config.slides.length > 1) { config.slides.splice(config.currentIdx, 1); if(config.currentIdx >= config.slides.length) config.currentIdx = config.slides.length - 1; selectSlide(config.currentIdx); saveState(); showToast("Слайд удален"); } 
+                else { showToast("Нельзя удалить последний слайд"); }
             }
         }
+        function selectSlide(idx) { config.currentIdx = idx; config.selected = null; renderSlideList(); loadUIFromSlide(); draw(); }
 
-        function selectSlide(idx) { 
-            config.currentIdx = idx; config.selected = null; 
-            renderSlideList(); loadUIFromSlide(); draw(); 
-        }
-
-        function renderSlideList() {
-            const list = document.getElementById('slideList');
-            list.innerHTML = '';
-            config.slides.forEach((s,i) => {
-                const isActive = i === config.currentIdx;
-                const el = document.createElement('div');
-                el.className = `slide-card p-3 mb-2 bg-slate-800 rounded-lg border border-slate-700 ${isActive ? 'active border-orange-500' : ''}`;
-                
-                // Header (Click to select)
-                const header = document.createElement('div');
-                header.className = "flex justify-between items-center mb-2";
-                header.innerHTML = `<span class="text-xs font-bold ${isActive ? 'text-white' : 'text-slate-400'}">Слайд ${i+1}</span>`;
-                header.onclick = (e) => { if(e.target === header || e.target.tagName === 'SPAN') selectSlide(i); };
-                el.appendChild(header);
-
-                // Controls Row
-                const controls = document.createElement('div');
-                controls.className = "slide-controls flex justify-between items-center mt-2 pt-2 border-t border-slate-700/50";
-                controls.innerHTML = `
-                    <div class="flex gap-1">
-                        <button onclick="event.stopPropagation(); moveSlide(${i}, -1)" class="p-1 hover:bg-slate-700 rounded text-slate-400" title="Вверх">↑</button>
-                        <button onclick="event.stopPropagation(); moveSlide(${i}, 1)" class="p-1 hover:bg-slate-700 rounded text-slate-400" title="Вниз">↓</button>
-                    </div>
-                    <button onclick="event.stopPropagation(); duplicateSlide(${i})" class="p-1 hover:bg-slate-700 rounded text-slate-400 hover:text-orange-400 text-xs font-bold flex items-center gap-1" title="Дублировать">
-                        📑 Копия
-                    </button>
-                `;
-                el.appendChild(controls);
-                
-                // Allow clicking main body to select too
-                el.onclick = (e) => {
-                    // Prevent firing when buttons are clicked (handled by stopPropagation, but safe check)
-                    if(e.target.tagName !== 'BUTTON') selectSlide(i);
-                };
-
-                list.appendChild(el);
-            });
-        }
-
-        // --- Interaction Logic (Touch + Mouse) ---
+        // --- Interaction ---
         function getPointerPos(e) {
             const r = canvas.getBoundingClientRect(); 
             let cx, cy;
-            if(e.touches && e.touches.length > 0) { cx = e.touches[0].clientX; cy = e.touches[0].clientY; }
-            else { cx = e.clientX; cy = e.clientY; }
-            const scaleX = config.width / r.width;
-            const scaleY = config.height / r.height;
+            if(e.touches && e.touches.length > 0) { cx = e.touches[0].clientX; cy = e.touches[0].clientY; } else { cx = e.clientX; cy = e.clientY; }
+            const scaleX = config.width / r.width; const scaleY = config.height / r.height;
             return { x: (cx - r.left) * scaleX, y: (cy - r.top) * scaleY }; 
         }
 
         function handleStart(e) {
-            const pos = getPointerPos(e); 
-            const s = config.slides[config.currentIdx]; 
-            let hit = false;
-            
-            // 1. Stickers
-            for(let i=s.stickers.length-1; i>=0; i--) { 
-                const st = s.stickers[i]; const size = (st.size||200)*(st.scale||1);
-                if(dist(pos, st) < size/2) { 
-                    config.drag = { active: true, target: `sticker-${i}`, offsetX: pos.x - st.x, offsetY: pos.y - st.y }; 
-                    config.selected = `sticker-${i}`; hit = true; showObjectControls(st.scale||1); break;
-                } 
-            }
-            // 2. Logos
+            const pos = getPointerPos(e); const s = config.slides[config.currentIdx]; let hit = false;
+            for(let i=s.stickers.length-1; i>=0; i--) { const st = s.stickers[i]; const size = (st.size||200)*(st.scale||1); if(dist(pos, st) < size/2) { config.drag = { active: true, target: `sticker-${i}`, offsetX: pos.x - st.x, offsetY: pos.y - st.y }; config.selected = `sticker-${i}`; hit = true; showObjectControls(st.scale||1); break; } }
             if(!hit) {
-                for(let i=s.logos.length-1; i>=0; i--) {
-                    const l = s.logos[i]; if(!l.img) continue;
-                    const w = 150 * l.scale;
-                    if(dist(pos, l) < w/2) {
-                        config.drag = { active: true, target: `logo-${i}`, offsetX: pos.x - l.x, offsetY: pos.y - l.y };
-                        config.selected = `logo-${i}`; hit = true; showObjectControls(l.scale); break;
-                    }
-                }
+                for(let i=s.logos.length-1; i>=0; i--) { const l = s.logos[i]; if(!l.img) continue; const w = 150 * l.scale; if(dist(pos, l) < w/2) { config.drag = { active: true, target: `logo-${i}`, offsetX: pos.x - l.x, offsetY: pos.y - l.y }; config.selected = `logo-${i}`; hit = true; showObjectControls(l.scale); break; } }
             }
-            // 3. Others
             if(!hit) {
                 config.selected = null; document.getElementById('objectControls').classList.add('hidden');
-                const isHit = (p, tPos, h, w=600) => Math.abs(p.y - tPos.y) < h && Math.abs(p.x - tPos.x) < w/2;
+                // Updated Hit detection for measured text
+                // We use simplified hit boxes here for UX speed, real bounds calc is in draw()
+                const isHit = (p, tPos, h, w) => Math.abs(p.y - tPos.y) < h && Math.abs(p.x - tPos.x) < w/2;
                 
-                if(s.chart.visible && dist(pos, s.chart.pos) < 150) {
-                    config.drag = { active: true, target: 'chart', offsetX: pos.x - s.chart.pos.x, offsetY: pos.y - s.chart.pos.y };
-                    config.selected = 'chart'; showObjectControls(s.chart.scale);
-                }
-                else if(isHit(pos, s.textPos, s.fontSize)) config.drag = { active: true, target: 'text', offsetX: pos.x - s.textPos.x, offsetY: pos.y - s.textPos.y };
-                else if(isHit(pos, s.subPos, s.subSize)) config.drag = { active: true, target: 'sub', offsetX: pos.x - s.subPos.x, offsetY: pos.y - s.subPos.y };
-                else if(isHit(pos, s.bodyPos, s.bodySize * 4)) config.drag = { active: true, target: 'body', offsetX: pos.x - s.bodyPos.x, offsetY: pos.y - s.bodyPos.y };
+                if(s.chart.visible && dist(pos, s.chart.pos) < 150) { config.drag = { active: true, target: 'chart', offsetX: pos.x - s.chart.pos.x, offsetY: pos.y - s.chart.pos.y }; config.selected = 'chart'; showObjectControls(s.chart.scale); }
+                else if(isHit(pos, s.textPos, s.fontSize, s.textMaxWidth)) config.drag = { active: true, target: 'text', offsetX: pos.x - s.textPos.x, offsetY: pos.y - s.textPos.y };
+                else if(isHit(pos, s.subPos, s.subSize, s.subMaxWidth)) config.drag = { active: true, target: 'sub', offsetX: pos.x - s.subPos.x, offsetY: pos.y - s.subPos.y };
+                else if(isHit(pos, s.bodyPos, s.bodySize * 4, s.bodyMaxWidth)) config.drag = { active: true, target: 'body', offsetX: pos.x - s.bodyPos.x, offsetY: pos.y - s.bodyPos.y };
                 else if(s.bgImg) config.drag = { active: true, target: 'bg', offsetX: pos.x - s.bgPos.x, offsetY: pos.y - s.bgPos.y };
             }
             draw();
         }
-
         function handleMove(e) {
             if(!config.drag.active) return;
             if(e.cancelable) e.preventDefault(); 
             const pos = getPointerPos(e); const s = config.slides[config.currentIdx];
             let x = pos.x - config.drag.offsetX; let y = pos.y - config.drag.offsetY;
-            
-            if(config.drag.target !== 'bg') { 
-                config.guides = {x:null, y:null}; 
-                if(Math.abs(x - config.width/2) < 20) { x = config.width/2; config.guides.x = x; } 
-                if(Math.abs(y - config.height/2) < 20) { y = config.height/2; config.guides.y = y; } 
-            }
-            
+            if(config.drag.target !== 'bg') { config.guides = {x:null, y:null}; if(Math.abs(x - config.width/2) < 20) { x = config.width/2; config.guides.x = x; } if(Math.abs(y - config.height/2) < 20) { y = config.height/2; config.guides.y = y; } }
             if(config.drag.target === 'text') s.textPos = {x,y}; 
             else if(config.drag.target === 'sub') s.subPos = {x,y}; 
             else if(config.drag.target === 'body') s.bodyPos = {x,y};
@@ -591,24 +569,10 @@
             else if(config.drag.target.startsWith('logo-')) { const idx = parseInt(config.drag.target.split('-')[1]); s.logos[idx].x = x; s.logos[idx].y = y; }
             draw();
         }
+        function handleEnd() { if(config.drag.active) { config.drag.active = false; config.guides = {x:null, y:null}; saveState(); draw(); } }
+        canvas.addEventListener('mousedown', handleStart); canvas.addEventListener('mousemove', handleMove); window.addEventListener('mouseup', handleEnd); canvas.addEventListener('touchstart', handleStart, {passive: false}); canvas.addEventListener('touchmove', handleMove, {passive: false}); canvas.addEventListener('touchend', handleEnd);
 
-        function handleEnd() { 
-            if(config.drag.active) { 
-                config.drag.active = false; 
-                config.guides = {x:null, y:null}; 
-                saveState(); // Save state after drag ends
-                draw(); 
-            } 
-        }
-        
-        canvas.addEventListener('mousedown', handleStart);
-        canvas.addEventListener('mousemove', handleMove);
-        window.addEventListener('mouseup', handleEnd);
-        canvas.addEventListener('touchstart', handleStart, {passive: false});
-        canvas.addEventListener('touchmove', handleMove, {passive: false});
-        canvas.addEventListener('touchend', handleEnd);
-
-        // --- Drawing & Rendering (Same as before) ---
+        // --- DRAWING ---
         function draw() {
             const s = config.slides[config.currentIdx];
             ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -619,27 +583,16 @@
                 let dx = (config.width - s.bgImg.width * ratio) / 2 + s.bgPos.x;
                 let dy = (config.height - s.bgImg.height * ratio) / 2 + s.bgPos.y;
                 ctx.drawImage(s.bgImg, 0,0, s.bgImg.width, s.bgImg.height, dx, dy, s.bgImg.width*ratio, s.bgImg.height*ratio);
-            } else { 
-                ctx.fillStyle = s.bgVal; ctx.fillRect(0, 0, config.width, config.height); 
-            }
+            } else { ctx.fillStyle = s.bgVal; ctx.fillRect(0, 0, config.width, config.height); }
             
             if (s.chart.visible) drawInfographic(s.chart);
             
-            drawTextBlock(s.text, s.textPos, s.fontSize, s.fontMain, s.colorMain, '900', 'text');
-            drawTextBlock(s.sub, s.subPos, s.subSize, s.fontSub, s.colorSub, '600', 'sub');
-            drawBodyText(s.body, s.bodyPos, s.bodySize, s.fontBody, s.colorBody, '400', 'body');
+            drawTextBlock(s.text, s.textPos, s.fontSize, s.fontMain, s.colorMain, '900', 'text', s.textBg, s.textMaxWidth);
+            drawTextBlock(s.sub, s.subPos, s.subSize, s.fontSub, s.colorSub, '600', 'sub', s.subBg, s.subMaxWidth);
+            drawBodyText(s.body, s.bodyPos, s.bodySize, s.fontBody, s.colorBody, '400', 'body', s.bodyBg, s.bodyMaxWidth);
             
-            s.logos.forEach((l, i) => { if(l.img) {
-                const w = 150 * l.scale; const h = w * (l.img.height / l.img.width);
-                ctx.drawImage(l.img, l.x - w/2, l.y - h/2, w, h);
-                if(config.selected === `logo-${i}`) drawSelectionBox(l.x, l.y, w, h);
-            }});
-
-            s.stickers.forEach((st, i) => {
-                const size = (st.size || 200) * (st.scale || 1);
-                ctx.drawImage(st.img, st.x - size/2, st.y - size/2, size, size);
-                if(config.selected === `sticker-${i}`) drawSelectionBox(st.x, st.y, size, size);
-            });
+            s.logos.forEach((l, i) => { if(l.img) { const w = 150 * l.scale; const h = w * (l.img.height / l.img.width); ctx.drawImage(l.img, l.x - w/2, l.y - h/2, w, h); if(config.selected === `logo-${i}`) drawSelectionBox(l.x, l.y, w, h); }});
+            s.stickers.forEach((st, i) => { const size = (st.size || 200) * (st.scale || 1); ctx.drawImage(st.img, st.x - size/2, st.y - size/2, size, size); if(config.selected === `sticker-${i}`) drawSelectionBox(st.x, st.y, size, size); });
             
             ctx.restore();
             if(config.effects.grain) applyGrain(); 
@@ -652,29 +605,146 @@
             if(config.guides.y) { ctx.beginPath(); ctx.moveTo(0,config.guides.y); ctx.lineTo(config.width,config.guides.y); ctx.strokeStyle='#06b6d4'; ctx.lineWidth=1; ctx.stroke(); }
             ctx.restore();
         }
-        
-        // ... (Render helpers: drawTextBlock, drawBodyText, drawInfographic, drawFrame, effects, etc. same as V6)
-        function drawTextBlock(txt, pos, size, font, color, weight, id) {
+
+        // --- ENHANCED Text Drawing with Wrap & Width ---
+        function drawTextBackground(ctx, x, y, w, h, bgConfig) {
+            if (!bgConfig || !bgConfig.show) return;
+            ctx.save();
+            const padding = parseInt(bgConfig.padding) || 20;
+            const radius = 10;
+            const rx = x - w/2 - padding;
+            const ry = y - h/2 - padding;
+            const rw = w + padding*2;
+            const rh = h + padding*2;
+            
+            ctx.fillStyle = bgConfig.color;
+            ctx.strokeStyle = bgConfig.color;
+            ctx.lineWidth = 5;
+
+            if (bgConfig.type === 'bracket') {
+                const bSize = 20; 
+                ctx.beginPath();
+                ctx.moveTo(rx + bSize, ry); ctx.lineTo(rx, ry); ctx.lineTo(rx, ry + rh); ctx.lineTo(rx + bSize, ry + rh);
+                ctx.moveTo(rx + rw - bSize, ry); ctx.lineTo(rx + rw, ry); ctx.lineTo(rx + rw, ry + rh); ctx.lineTo(rx + rw - bSize, ry + rh);
+                ctx.stroke();
+            } 
+            else if (bgConfig.type === 'underline') {
+                ctx.beginPath();
+                ctx.moveTo(rx, ry + rh);
+                ctx.lineTo(rx + rw, ry + rh);
+                ctx.lineWidth = 8;
+                ctx.stroke();
+            }
+            else if (bgConfig.type === 'marker') {
+                ctx.globalAlpha = 0.5;
+                ctx.fillRect(rx, ry + 10, rw, rh - 20); 
+            }
+            else {
+                ctx.beginPath();
+                if (ctx.roundRect) ctx.roundRect(rx, ry, rw, rh, radius);
+                else ctx.rect(rx, ry, rw, rh);
+                if (bgConfig.type === 'stroke') ctx.stroke();
+                else ctx.fill();
+            }
+            ctx.restore();
+        }
+
+        // Now uses wrapText for ALL text blocks (titles included)
+        function drawTextBlock(txt, pos, size, font, color, weight, id, bgConfig, maxWidth) {
             if(!txt) return; 
-            ctx.save(); ctx.font = `${weight} ${size}px "${font}"`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = color; ctx.shadowColor = 'rgba(0,0,0,0.5)'; ctx.shadowBlur = 10;
-            ctx.fillText(txt.toUpperCase(), pos.x, pos.y);
-            if(config.drag.target === id) { const m = ctx.measureText(txt.toUpperCase()); ctx.strokeStyle = '#ea580c'; ctx.lineWidth = 1; ctx.strokeRect(pos.x - m.width/2 - 10, pos.y - size/2 - 10, m.width+20, size+20); } 
+            ctx.save(); 
+            ctx.font = `${weight} ${size}px "${font}"`; 
+            
+            const lines = wrapText(ctx, txt, maxWidth || 800);
+            const lineHeight = size * 1.1;
+            const totalHeight = lines.length * lineHeight;
+            
+            // Calc max width of actual lines for bg box
+            let actualW = 0;
+            lines.forEach(l => { const w = ctx.measureText(l).width; if(w > actualW) actualW = w; });
+            
+            drawTextBackground(ctx, pos.x, pos.y, actualW, totalHeight, bgConfig);
+
+            ctx.textAlign = 'center'; 
+            ctx.textBaseline = 'middle'; 
+            ctx.fillStyle = color; 
+            ctx.shadowColor = 'rgba(0,0,0,0.5)'; ctx.shadowBlur = 10;
+            
+            const startY = pos.y - (totalHeight/2) + (lineHeight/2);
+            lines.forEach((l, i) => {
+                 ctx.fillText(l.toUpperCase(), pos.x, startY + i * lineHeight);
+            });
+            
+            // Draw Bounds Guide
+            const isActive = config.drag.target === id || (document.getElementById(`settings-${id}`) && document.getElementById(`settings-${id}`).classList.contains('open'));
+            if(isActive) { 
+                ctx.strokeStyle = '#06b6d4'; ctx.lineWidth = 2; ctx.setLineDash([5,5]);
+                ctx.strokeRect(pos.x - maxWidth/2, pos.y - totalHeight/2 - 20, maxWidth, totalHeight + 40);
+                ctx.setLineDash([]);
+                // Selection box around content
+                ctx.strokeStyle = '#ea580c'; ctx.lineWidth = 1; 
+                ctx.strokeRect(pos.x - actualW/2 - 10, pos.y - totalHeight/2 - 10, actualW+20, totalHeight+20); 
+            } 
             ctx.restore();
         }
-        function drawBodyText(txt, pos, size, font, color, weight, id) {
-            if(!txt) return; ctx.save(); ctx.font = `${weight} ${size}px "${font}"`; ctx.fillStyle = color; ctx.textAlign = 'center'; ctx.textBaseline = 'top'; ctx.shadowColor = 'rgba(0,0,0,0.3)'; ctx.shadowBlur = 4;
-            const maxWidth = config.width * 0.8; const lineHeight = size * 1.4; const lines = wrapText(ctx, txt, maxWidth);
-            const totalHeight = lines.length * lineHeight; let startY = pos.y - totalHeight / 2;
+
+        function drawBodyText(txt, pos, size, font, color, weight, id, bgConfig, maxWidth) {
+            if(!txt) return;
+            ctx.save();
+            ctx.font = `${weight} ${size}px "${font}"`;
+            
+            const lines = wrapText(ctx, txt, maxWidth || 800);
+            const lineHeight = size * 1.4;
+            const totalHeight = lines.length * lineHeight;
+            let startY = pos.y - totalHeight / 2;
+
+            let actualW = 0;
+            lines.forEach(l => { const mw = ctx.measureText(l).width; if(mw > actualW) actualW = mw; });
+            
+            if (bgConfig && bgConfig.show) {
+                drawTextBackground(ctx, pos.x, pos.y, actualW, totalHeight, bgConfig);
+            }
+
+            ctx.fillStyle = color;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'top'; 
+            ctx.shadowColor = 'rgba(0,0,0,0.3)'; ctx.shadowBlur = 4;
+            
             lines.forEach((line, i) => ctx.fillText(line, pos.x, startY + i * lineHeight));
-            if(config.drag.target === id) { ctx.strokeStyle = '#ea580c'; ctx.lineWidth = 1; ctx.strokeRect(pos.x - maxWidth/2 - 10, startY - 10, maxWidth + 20, totalHeight + 20); }
+            
+            const isActive = config.drag.target === id || (document.getElementById(`settings-${id}`) && document.getElementById(`settings-${id}`).classList.contains('open'));
+            if(isActive) { 
+                // Bounds
+                ctx.strokeStyle = '#06b6d4'; ctx.lineWidth = 2; ctx.setLineDash([5,5]);
+                ctx.strokeRect(pos.x - maxWidth/2, startY - 20, maxWidth, totalHeight + 40);
+                ctx.setLineDash([]);
+                // Selection
+                ctx.strokeStyle = '#ea580c'; ctx.lineWidth = 1; 
+                ctx.strokeRect(pos.x - maxWidth/2 - 10, startY - 10, maxWidth + 20, totalHeight + 20); 
+            }
             ctx.restore();
         }
+
         function wrapText(ctx, text, maxWidth) {
             const words = text.split(' '); let lines = []; let currentLine = words[0];
             for (let i = 1; i < words.length; i++) { let word = words[i]; let width = ctx.measureText(currentLine + " " + word).width; if (width < maxWidth) { currentLine += " " + word; } else { lines.push(currentLine); currentLine = word; } }
             lines.push(currentLine); return lines;
         }
-        function drawInfographic(chart) {
+
+        function drawFrame() {
+            if(config.frame.type === 'none') return;
+            const type=config.frame.type, color=config.frame.color, pad=parseInt(config.frame.padding), radius=parseInt(config.frame.radius), thickness=parseInt(config.frame.thickness);
+            const w=config.width-pad*2, h=config.height-pad*2; if(w<10||h<10)return;
+            ctx.save(); ctx.strokeStyle=color; ctx.lineWidth=thickness; ctx.lineJoin='round';
+            const roundRect=(x,y,w,h,r)=>{ctx.beginPath();if(ctx.roundRect)ctx.roundRect(x,y,w,h,r);else ctx.rect(x,y,w,h);ctx.stroke();};
+            if(type==='simple') roundRect(pad,pad,w,h,radius);
+            else if(type==='offset'){roundRect(pad,pad,w,h,radius);ctx.globalAlpha=0.5;const off=thickness*2;roundRect(pad+off,pad+off,w-off*2,h-off*2,Math.max(0,radius-10));}
+            else if(type==='neon'){ctx.shadowColor=color;ctx.shadowBlur=40;ctx.lineWidth=Math.max(4,thickness-2);roundRect(pad+10,pad+10,w-20,h-20,radius);ctx.shadowBlur=20;ctx.lineWidth=2;roundRect(pad+10,pad+10,w-20,h-20,radius);}
+            ctx.restore();
+        }
+
+        // --- Common Helpers ---
+        function drawInfographic(chart){/* Same as previous */
             const cx=chart.pos.x, cy=chart.pos.y, scale=chart.scale;
             const data=chart.data.split(',').map(n=>parseFloat(n.trim())||0), labels=chart.labels.split(',').map(s=>s.trim()), color=chart.colors||'#ea580c';
             ctx.save();
@@ -684,55 +754,111 @@
             else if(chart.type==='line'){const w=400*scale,h=200*scale,step=w/(data.length-1),maxVal=Math.max(...data,100),startX=cx-w/2,startY=cy+h/2;ctx.beginPath();ctx.strokeStyle=color;ctx.lineWidth=5*scale;data.forEach((val,i)=>{const px=startX+i*step,py=startY-(val/maxVal)*h;if(i===0)ctx.moveTo(px,py);else ctx.lineTo(px,py);});ctx.stroke();data.forEach((val,i)=>{const px=startX+i*step,py=startY-(val/maxVal)*h;ctx.beginPath();ctx.arc(px,py,8*scale,0,Math.PI*2);ctx.fillStyle='#fff';ctx.fill();if(labels[i]){ctx.fillStyle='#cbd5e1';ctx.font=`${14*scale}px Inter`;ctx.fillText(labels[i],px,startY+25*scale);}});}
             ctx.restore();
         }
-        function drawFrame() {
-            if(config.frame.type==='none')return; const type=config.frame.type,color=config.frame.color,pad=parseInt(config.frame.padding),w=config.width-pad*2,h=config.height-pad*2; if(w<10||h<10)return;
-            ctx.save(); ctx.strokeStyle=color; ctx.lineWidth=10;
-            if(type==='simple')ctx.strokeRect(pad,pad,w,h); else if(type==='offset'){ctx.strokeRect(pad,pad,w,h);ctx.globalAlpha=0.5;ctx.strokeRect(pad+20,pad+20,w-40,h-40);} else if(type==='neon'){ctx.shadowColor=color;ctx.shadowBlur=40;ctx.lineWidth=8;ctx.strokeRect(pad+10,pad+10,w-20,h-20);ctx.shadowBlur=20;ctx.strokeRect(pad+10,pad+10,w-20,h-20);}
-            ctx.restore();
-        }
-        function applyGrain(){const w=canvas.width,h=canvas.height,imgData=ctx.getImageData(0,0,w,h),data=imgData.data;for(let i=0;i<data.length;i+=4){const grain=(Math.random()-0.5)*30;data[i]+=grain;data[i+1]+=grain;data[i+2]+=grain;}ctx.putImageData(imgData,0,0);}
-        function applyRetro(){ctx.save();ctx.globalCompositeOperation='overlay';ctx.fillStyle='#783f04';ctx.globalAlpha=0.3;ctx.fillRect(0,0,canvas.width,canvas.height);ctx.globalCompositeOperation='source-over';ctx.fillStyle='rgba(255, 240, 200, 0.1)';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.restore();}
+        function applyGrain(){const w=canvas.width,h=canvas.height,imgData=ctx.getImageData(0,0,w,h),data=imgData.data;for(let i=0;i<data.length;i+=4){const grain=(Math.random()-0.5)*30;data[i]+=grain;data[i+1]+=grain;data[i+2]+=grain;}ctx.putImageData(imgData,0,0);} 
+        function applyRetro(){ctx.save();ctx.globalCompositeOperation='overlay';ctx.fillStyle='#783f04';ctx.globalAlpha=0.3;ctx.fillRect(0,0,canvas.width,canvas.height);ctx.globalCompositeOperation='source-over';ctx.fillStyle='rgba(255, 240, 200, 0.1)';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.restore();} 
         function applyVignette(){const g=ctx.createRadialGradient(canvas.width/2,canvas.height/2,canvas.width/3,canvas.width/2,canvas.height/2,canvas.width);g.addColorStop(0,'rgba(0,0,0,0)');g.addColorStop(1,'rgba(0,0,0,0.8)');ctx.save();ctx.fillStyle=g;ctx.fillRect(0,0,canvas.width,canvas.height);ctx.restore();}
-        function shadeColor(color, percent) { let R = parseInt(color.substring(1,3),16); let G = parseInt(color.substring(3,5),16); let B = parseInt(color.substring(5,7),16); R = parseInt(R * (100 + percent) / 100); G = parseInt(G * (100 + percent) / 100); B = parseInt(B * (100 + percent) / 100); R = (R<255)?R:255; G = (G<255)?G:255; B = (B<255)?B:255; return "#"+((1<<24)+(R<<16)+(G<<8)+B).toString(16).slice(1); }
-        function dist(p1, p2) { return Math.sqrt(Math.pow(p1.x-p2.x, 2) + Math.pow(p1.y-p2.y, 2)); }
-        function drawSelectionBox(x, y, w, h) { ctx.strokeStyle = '#ea580c'; ctx.lineWidth = 3; ctx.strokeRect(x - w/2 - 5, y - h/2 - 5, w + 10, h + 10); ctx.fillStyle = '#fff'; ctx.fillRect(x+w/2, y+h/2, 10, 10); }
-        function updateColor(key, val) { config.slides[config.currentIdx][key] = val; draw(); }
-        function toggleEffect(eff) { config.effects[eff] = !config.effects[eff]; const btn = document.getElementById(`eff-${eff}`); if(config.effects[eff]) btn.classList.add('active'); else btn.classList.remove('active'); saveState(); draw(); }
-        function showObjectControls(sc) { document.getElementById('objectControls').classList.remove('hidden'); document.getElementById('objectScaleSlider').value = sc*100; document.getElementById('objectScaleValue').innerText = Math.round(sc*100)+'%'; }
-        function closeObjControls() { document.getElementById('objectControls').classList.add('hidden'); config.selected = null; draw(); }
-        function updateSelectedObjectScale() { const val = document.getElementById('objectScaleSlider').value / 100; const s = config.slides[config.currentIdx]; if(config.selected && config.selected.startsWith('sticker-')) s.stickers[parseInt(config.selected.split('-')[1])].scale = val; else if(config.selected && config.selected.startsWith('logo-')) s.logos[parseInt(config.selected.split('-')[1])].scale = val; else if(config.selected === 'chart') s.chart.scale = val; document.getElementById('objectScaleValue').innerText = Math.round(val*100)+'%'; draw(); }
-        function changeFormat(ratio) { if(ratio === '1:1') { config.width = 1080; config.height = 1080; } if(ratio === '9:16') { config.width = 1080; config.height = 1920; } if(ratio === '16:9') { config.width = 1920; config.height = 1080; } document.querySelectorAll('[id^="btn-"]').forEach(b => { b.classList.remove('bg-orange-600', 'text-white'); b.classList.add('text-slate-300', 'hover:bg-slate-700'); }); const btn = document.getElementById(`btn-${ratio.replace(':','-')}`); if(btn) { btn.classList.add('bg-orange-600', 'text-white'); btn.classList.remove('text-slate-300'); } canvas.width = config.width * SCALE; canvas.height = config.height * SCALE; config.slides.forEach(s => { s.textPos.x = config.width/2; s.subPos.x = config.width/2; s.bodyPos.x = config.width/2; s.chart.pos.x = config.width/2; }); draw(); }
+        function shadeColor(c,p){ let R = parseInt(c.substring(1,3),16); let G = parseInt(c.substring(3,5),16); let B = parseInt(c.substring(5,7),16); R = parseInt(R * (100 + p) / 100); G = parseInt(G * (100 + p) / 100); B = parseInt(B * (100 + p) / 100); R = (R<255)?R:255; G = (G<255)?G:255; B = (B<255)?B:255; return "#"+((1<<24)+(R<<16)+(G<<8)+B).toString(16).slice(1); }
+        function dist(p1,p2){return Math.sqrt(Math.pow(p1.x-p2.x,2)+Math.pow(p1.y-p2.y,2));}
+        function drawSelectionBox(x,y,w,h){ctx.strokeStyle='#ea580c';ctx.lineWidth=3;ctx.strokeRect(x-w/2-5,y-h/2-5,w+10,h+10);ctx.fillStyle='#fff';ctx.fillRect(x+w/2,y+h/2,10,10);}
+        function updateColor(k,v){config.slides[config.currentIdx][k]=v;draw();}
+        function toggleEffect(e){config.effects[e]=!config.effects[e];document.getElementById(`eff-${e}`).classList.toggle('active');saveState();draw();}
+        function showObjectControls(sc){document.getElementById('objectControls').classList.remove('hidden');document.getElementById('objectScaleSlider').value=sc*100;document.getElementById('objectScaleValue').innerText=Math.round(sc*100)+'%';}
+        function closeObjControls(){document.getElementById('objectControls').classList.add('hidden');config.selected=null;draw();}
+        function updateSelectedObjectScale(){const val=document.getElementById('objectScaleSlider').value/100;const s=config.slides[config.currentIdx];if(config.selected?.startsWith('sticker-'))s.stickers[parseInt(config.selected.split('-')[1])].scale=val;else if(config.selected?.startsWith('logo-'))s.logos[parseInt(config.selected.split('-')[1])].scale=val;else if(config.selected==='chart')s.chart.scale=val;document.getElementById('objectScaleValue').innerText=Math.round(val*100)+'%';draw();}
+        function changeFormat(r){if(r==='1:1'){config.width=1080;config.height=1080;}if(r==='9:16'){config.width=1080;config.height=1920;}if(r==='16:9'){config.width=1920;config.height=1080;}document.querySelectorAll('[id^="btn-"]').forEach(b=>{b.classList.remove('bg-orange-600','text-white');b.classList.add('text-slate-300','hover:bg-slate-700');});document.getElementById(`btn-${r.replace(':','-')}`).classList.add('bg-orange-600','text-white');canvas.width=config.width*SCALE;canvas.height=config.height*SCALE;config.slides.forEach(s=>{s.textPos.x=config.width/2;s.subPos.x=config.width/2;s.bodyPos.x=config.width/2;s.chart.pos.x=config.width/2;});draw();}
+
         function saveAndRender() {
             const s = config.slides[config.currentIdx];
             s.text = document.getElementById('textInput').value; s.fontSize = parseInt(document.getElementById('fontSizeSlider').value); s.fontMain = document.getElementById('fontSelectMain').value;
             s.sub = document.getElementById('subInput').value; s.subSize = parseInt(document.getElementById('subSizeSlider').value); s.fontSub = document.getElementById('fontSelectSub').value;
             s.body = document.getElementById('bodyInput').value; s.bodySize = parseInt(document.getElementById('bodySizeSlider').value); s.fontBody = document.getElementById('fontSelectBody').value;
+            
+            s.textBg.show = document.getElementById('mainBgShow').checked; s.textBg.type = document.getElementById('mainBgType').value; s.textBg.color = document.getElementById('mainBgColor').value; s.textBg.padding = document.getElementById('mainBgPadding').value; s.textMaxWidth = parseInt(document.getElementById('textMaxWidth').value);
+            s.subBg.show = document.getElementById('subBgShow').checked; s.subBg.type = document.getElementById('subBgType').value; s.subBg.color = document.getElementById('subBgColor').value; s.subBg.padding = document.getElementById('subBgPadding').value; s.subMaxWidth = parseInt(document.getElementById('subMaxWidth').value);
+            s.bodyBg.show = document.getElementById('bodyBgShow').checked; s.bodyBg.type = document.getElementById('bodyBgType').value; s.bodyBg.color = document.getElementById('bodyBgColor').value; s.bodyBg.padding = document.getElementById('bodyBgPadding').value; s.bodyMaxWidth = parseInt(document.getElementById('bodyMaxWidth').value);
+
             s.chart.visible = document.getElementById('showChart').checked; s.chart.type = document.getElementById('chartType').value; s.chart.labels = document.getElementById('chartLabels').value; s.chart.data = document.getElementById('chartData').value; s.chart.scale = parseInt(document.getElementById('chartScale').value) / 100;
-            config.frame.type = document.getElementById('frameType').value; config.frame.padding = document.getElementById('framePadding').value; config.frame.color = document.getElementById('frameColor').value;
+            config.frame.type = document.getElementById('frameType').value; config.frame.padding = document.getElementById('framePadding').value; config.frame.color = document.getElementById('frameColor').value; config.frame.thickness = document.getElementById('frameThickness').value; config.frame.radius = document.getElementById('frameRadius').value;
             draw();
         }
+
         function loadUIFromSlide() {
             const s = config.slides[config.currentIdx];
-            document.getElementById('textInput').value = s.text; document.getElementById('fontSizeSlider').value = s.fontSize; document.getElementById('mainColor').value = s.colorMain; document.getElementById('fontSelectMain').value = s.fontMain;
-            document.getElementById('subInput').value = s.sub; document.getElementById('subSizeSlider').value = s.subSize; document.getElementById('subColor').value = s.colorSub; document.getElementById('fontSelectSub').value = s.fontSub;
-            document.getElementById('bodyInput').value = s.body; document.getElementById('bodySizeSlider').value = s.bodySize; document.getElementById('bodyColor').value = s.colorBody; document.getElementById('fontSelectBody').value = s.fontBody;
-            document.getElementById('showChart').checked = s.chart.visible; document.getElementById('chartType').value = s.chart.type; document.getElementById('chartLabels').value = s.chart.labels; document.getElementById('chartData').value = s.chart.data; document.getElementById('chartScale').value = s.chart.scale * 100;
-            document.getElementById('frameType').value = config.frame.type; document.getElementById('framePadding').value = config.frame.padding; document.getElementById('frameColor').value = config.frame.color;
+            document.getElementById('textInput').value=s.text; document.getElementById('fontSizeSlider').value=s.fontSize; document.getElementById('mainColor').value=s.colorMain; document.getElementById('fontSelectMain').value=s.fontMain;
+            document.getElementById('subInput').value=s.sub; document.getElementById('subSizeSlider').value=s.subSize; document.getElementById('subColor').value=s.colorSub; document.getElementById('fontSelectSub').value=s.fontSub;
+            document.getElementById('bodyInput').value=s.body; document.getElementById('bodySizeSlider').value=s.bodySize; document.getElementById('bodyColor').value=s.colorBody; document.getElementById('fontSelectBody').value=s.fontBody;
+            
+            if(!s.textBg) s.textBg = {show:false, color:'#000000', type:'fill', padding:20};
+            document.getElementById('mainBgShow').checked = s.textBg.show; document.getElementById('mainBgType').value = s.textBg.type; document.getElementById('mainBgColor').value = s.textBg.color; document.getElementById('mainBgPadding').value = s.textBg.padding || 20; document.getElementById('textMaxWidth').value = s.textMaxWidth || 800;
+            
+            if(!s.subBg) s.subBg = {show:false, color:'#000000', type:'fill', padding:10};
+            document.getElementById('subBgShow').checked = s.subBg.show; document.getElementById('subBgType').value = s.subBg.type; document.getElementById('subBgColor').value = s.subBg.color; document.getElementById('subBgPadding').value = s.subBg.padding || 10; document.getElementById('subMaxWidth').value = s.subMaxWidth || 800;
+            
+            if(!s.bodyBg) s.bodyBg = {show:false, color:'#000000', type:'fill', padding:10};
+            document.getElementById('bodyBgShow').checked = s.bodyBg.show; document.getElementById('bodyBgType').value = s.bodyBg.type; document.getElementById('bodyBgColor').value = s.bodyBg.color; document.getElementById('bodyBgPadding').value = s.bodyBg.padding || 10; document.getElementById('bodyMaxWidth').value = s.bodyMaxWidth || 800;
+
+            document.getElementById('showChart').checked=s.chart.visible; document.getElementById('chartType').value=s.chart.type; document.getElementById('chartLabels').value=s.chart.labels; document.getElementById('chartData').value=s.chart.data; document.getElementById('chartScale').value=s.chart.scale*100;
+            document.getElementById('frameType').value=config.frame.type; document.getElementById('framePadding').value=config.frame.padding; document.getElementById('frameColor').value=config.frame.color; document.getElementById('frameThickness').value=config.frame.thickness; document.getElementById('frameRadius').value=config.frame.radius;
             ['grain', 'retro', 'vignette'].forEach(e => { const btn = document.getElementById(`eff-${e}`); if(config.effects[e]) btn.classList.add('active'); else btn.classList.remove('active'); });
+            
+            document.getElementById('saveBgBtn').classList.toggle('hidden', !s.bgImg);
         }
-        function saveProjectToStorage() { localStorage.setItem('carousel_project_v7', JSON.stringify({width:config.width, height:config.height, slides: config.slides.map(s => ({...s, bgImg:null, logos:[], stickers:[]}))})); showToast("Проект сохранен!"); }
-        function loadProjectFromStorage() { try { const d = JSON.parse(localStorage.getItem('carousel_project_v7')); config.width=d.width; config.height=d.height; config.slides=d.slides; changeFormat('1:1'); } catch(e){ console.log(e); addSlide(false); } }
-        function showToast(m) { const t=document.getElementById("toast");t.innerText=m;t.className="show"; setTimeout(()=>t.className="",3000); }
-        function handleBgUpload(e) { const f=e.target.files[0]; if(!f)return; const r=new FileReader(); r.onload=(ev)=>{const i=new Image(); i.onload=()=>{config.slides[config.currentIdx].bgImg=i; saveState(); draw();}; i.src=ev.target.result;}; r.readAsDataURL(f); }
-        function handleLogoUpload(e) { const f=e.target.files[0]; if(!f)return; const r=new FileReader(); r.onload=(ev)=>{const i=new Image(); i.onload=()=>{config.slides[config.currentIdx].logos.push({img:i, x:config.width/2, y:config.height/2, scale:1}); saveState(); draw();}; i.src=ev.target.result;}; r.readAsDataURL(f); }
-        function toggleDownloadMenu() { document.getElementById('downloadMenu').classList.toggle('show'); }
-        function downloadCurrent(fmt) { const link = document.createElement('a'); link.download = `slide_${config.currentIdx + 1}.${fmt}`; link.href = canvas.toDataURL(`image/${fmt}`, 0.9); link.click(); toggleDownloadMenu(); }
-        function switchTab(tab) { const tabs = {'slides': document.getElementById('leftPanel'), 'canvas': document.getElementById('mainArea'), 'settings': document.getElementById('rightPanel')}; const btns = {'slides': document.getElementById('tab-slides'), 'canvas': document.getElementById('tab-canvas'), 'settings': document.getElementById('tab-settings')}; Object.keys(tabs).forEach(k => { if (k === tab) { tabs[k].classList.remove('hidden'); tabs[k].classList.add('flex'); btns[k].classList.add('active', 'text-orange-500', 'border-orange-500'); btns[k].classList.remove('text-slate-400', 'border-transparent'); } else { tabs[k].classList.add('hidden'); tabs[k].classList.remove('flex'); btns[k].classList.remove('active', 'text-orange-500', 'border-orange-500'); btns[k].classList.add('text-slate-400', 'border-transparent'); } }); if(tab === 'canvas') draw(); }
-        
-        const stickersDB = {'popular': ['🔥','👍','✅','🚀','💡','⭐','❤️','💬'], 'shapes': ['⚫','⚪','🟥','🟦','🔺','🔷','⭐','🛑'], 'arrows': ['➡️','⬅️','⬆️','⬇️','↗️','↘️','🔄','↩️'], 'social': ['📷','🐦','▶️','💼','📱','📧','🌐','🔔']};
-        function loadStickerCategory(cat) { const div = document.getElementById('stickerResults'); div.innerHTML = ''; stickersDB[cat].forEach(s => { const el = document.createElement('div'); el.className = "sticker-item"; el.innerText = s; el.onclick = () => addStickerToCanvas(s); div.appendChild(el); }); }
-        function addStickerToCanvas(emoji) { const c = document.createElement('canvas'); c.width = 200; c.height = 200; const x = c.getContext('2d'); x.font = "160px serif"; x.textAlign = "center"; x.textBaseline = "middle"; x.fillText(emoji, 100, 110); const img = new Image(); img.src = c.toDataURL(); img.onload = () => { config.slides[config.currentIdx].stickers.push({img, x: config.width/2, y: config.height/2, scale: 1, size: 200}); saveState(); draw(); showToast("Стикер добавлен"); }; }
-        async function exportAllPDF() { alert('PDF Экспорт'); }
+
+        function toggleTextSettings(type) {
+            const el = document.getElementById(`settings-${type}`);
+            el.classList.toggle('open');
+        }
+
+        function loadBgPresets() {
+            try { const saved = JSON.parse(localStorage.getItem('carousel_bg_presets') || '[]'); config.bgPresets = saved; renderBgPresets(); } catch(e) { console.error('Presets load error', e); }
+        }
+        function saveCurrentBgAsPreset() {
+            const s = config.slides[config.currentIdx]; if (!s.bgImg) { showToast("Нет фонового изображения"); return; }
+            const fullCanvas = document.createElement('canvas'); fullCanvas.width = 600; fullCanvas.height = 600; const fCtx = fullCanvas.getContext('2d');
+            fCtx.drawImage(s.bgImg, 0, 0, 600, 600 * (s.bgImg.height/s.bgImg.width)); const dataUrl = fullCanvas.toDataURL('image/jpeg', 0.8);
+            config.bgPresets.push(dataUrl); localStorage.setItem('carousel_bg_presets', JSON.stringify(config.bgPresets)); renderBgPresets(); showToast("Фон сохранен в пресеты");
+        }
+        function renderBgPresets() {
+            const container = document.getElementById('bgPresets'); container.innerHTML = '';
+            config.bgPresets.forEach((url, idx) => {
+                const el = document.createElement('div'); el.className = 'bg-preset-item'; el.style.backgroundImage = `url(${url})`; el.onclick = () => applyBgPreset(url);
+                const del = document.createElement('div'); del.className = 'bg-delete-btn'; del.innerText = 'x'; del.onclick = (e) => { e.stopPropagation(); deleteBgPreset(idx); };
+                el.appendChild(del); container.appendChild(el);
+            });
+        }
+        function applyBgPreset(url) { const img = new Image(); img.onload = () => { config.slides[config.currentIdx].bgImg = img; document.getElementById('saveBgBtn').classList.remove('hidden'); draw(); saveState(); }; img.src = url; }
+        function deleteBgPreset(idx) { config.bgPresets.splice(idx, 1); localStorage.setItem('carousel_bg_presets', JSON.stringify(config.bgPresets)); renderBgPresets(); }
+
+        async function exportAllPDF() {
+            document.getElementById('loader').style.display = 'flex';
+            setTimeout(async () => {
+                try {
+                    const doc = new jspdf.jsPDF({ orientation: config.width > config.height ? 'l' : 'p', unit: 'px', format: [config.width, config.height] });
+                    const originalIdx = config.currentIdx;
+                    for (let i = 0; i < config.slides.length; i++) {
+                        if (i > 0) doc.addPage();
+                        config.currentIdx = i; draw();
+                        const imgData = canvas.toDataURL('image/jpeg', 0.95);
+                        doc.addImage(imgData, 'JPEG', 0, 0, config.width, config.height);
+                    }
+                    config.currentIdx = originalIdx; draw();
+                    doc.save('carousel-presentation.pdf'); showToast("PDF успешно скачан!");
+                } catch (e) { console.error(e); showToast("Ошибка при создании PDF"); } finally { document.getElementById('loader').style.display = 'none'; }
+            }, 100);
+        }
+
+        function saveProjectToStorage(){localStorage.setItem('carousel_project_v11', JSON.stringify({width:config.width, height:config.height, slides: config.slides.map(s => ({...s, bgImg:null, logos:[], stickers:[]}))})); showToast("Проект сохранен!");}
+        function loadProjectFromStorage(){try{const d=JSON.parse(localStorage.getItem('carousel_project_v11'));config.width=d.width;config.height=d.height;config.slides=d.slides;changeFormat('1:1');}catch(e){console.log(e);addSlide(false);}}
+        function showToast(m){const t=document.getElementById("toast");t.innerText=m;t.className="show";setTimeout(()=>t.className="",3000);}
+        function handleBgUpload(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=(ev)=>{const i=new Image();i.onload=()=>{config.slides[config.currentIdx].bgImg=i;document.getElementById('saveBgBtn').classList.remove('hidden');saveState();draw();};i.src=ev.target.result;};r.readAsDataURL(f);}
+        function handleLogoUpload(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=(ev)=>{const i=new Image();i.onload=()=>{config.slides[config.currentIdx].logos.push({img:i,x:config.width/2,y:config.height/2,scale:1});saveState();draw();};i.src=ev.target.result;};r.readAsDataURL(f);}
+        function toggleDownloadMenu(){document.getElementById('downloadMenu').classList.toggle('show');}
+        function downloadCurrent(fmt){const link=document.createElement('a');link.download=`slide_${config.currentIdx+1}.${fmt}`;link.href=canvas.toDataURL(`image/${fmt}`,0.9);link.click();toggleDownloadMenu();}
+        function switchTab(t){const tabs={'slides':document.getElementById('leftPanel'),'canvas':document.getElementById('mainArea'),'settings':document.getElementById('rightPanel')};const btns={'slides':document.getElementById('tab-slides'),'canvas':document.getElementById('tab-canvas'),'settings':document.getElementById('tab-settings')};Object.keys(tabs).forEach(k=>{if(k===t){tabs[k].classList.remove('hidden');tabs[k].classList.add('flex');btns[k].classList.add('active','text-orange-500','border-orange-500');btns[k].classList.remove('text-slate-400','border-transparent');}else{tabs[k].classList.add('hidden');tabs[k].classList.remove('flex');btns[k].classList.remove('active','text-orange-500','border-orange-500');btns[k].classList.add('text-slate-400','border-transparent');}});if(t==='canvas')draw();}
+        function renderSlideList(){const list=document.getElementById('slideList');list.innerHTML='';config.slides.forEach((s,i)=>{const isActive=i===config.currentIdx;const el=document.createElement('div');el.className=`slide-card p-3 mb-2 bg-slate-800 rounded-lg border border-slate-700 ${isActive?'active border-orange-500':''}`;const header=document.createElement('div');header.className="flex justify-between items-center mb-2";header.innerHTML=`<span class="text-xs font-bold ${isActive?'text-white':'text-slate-400'}">Слайд ${i+1}</span>`;header.onclick=(e)=>{if(e.target===header||e.target.tagName==='SPAN')selectSlide(i);};el.appendChild(header);const controls=document.createElement('div');controls.className="slide-controls flex justify-between items-center mt-2 pt-2 border-t border-slate-700/50";controls.innerHTML=`<div class="flex gap-1"><button onclick="event.stopPropagation();moveSlide(${i},-1)" class="p-1 hover:bg-slate-700 rounded text-slate-400">↑</button><button onclick="event.stopPropagation();moveSlide(${i},1)" class="p-1 hover:bg-slate-700 rounded text-slate-400">↓</button></div><button onclick="event.stopPropagation();duplicateSlide(${i})" class="p-1 hover:bg-slate-700 rounded text-slate-400 hover:text-orange-400 text-xs font-bold flex items-center gap-1">📑 Копия</button>`;el.appendChild(controls);el.onclick=(e)=>{if(e.target.tagName!=='BUTTON')selectSlide(i);};list.appendChild(el);});}
+        const stickersDB={'popular':['🔥','👍','✅','🚀','💡','⭐','❤️','💬','😂','😎','👀','💯'],'business':['💼','📈','📉','📊','📅','📝','📎','💰','🤝','🏢','📞','📧'],'shapes':['⚫','⚪','🟥','🟦','🟩','🟨','🔶','🔷','🔺','🔻','⭐','🛑'],'arrows':['➡️','⬅️','⬆️','⬇️','↗️','↘️','🔄','↩️','🔽','🔼','⏭️','⏮️'],'numbers':['1️⃣','2️⃣','3️⃣','4️⃣','5️⃣','6️⃣','7️⃣','8️⃣','9️⃣','0️⃣','🔟','#️⃣'],'social':['📷','🐦','▶️','🔴','💬','🔔','📢','🌐','📱','💻','👤','👥']};
+        function loadStickerCategory(c){const div=document.getElementById('stickerResults');div.innerHTML='';if(stickersDB[c]){stickersDB[c].forEach(s=>{const el=document.createElement('div');el.className="sticker-item";el.innerText=s;el.onclick=()=>addStickerToCanvas(s);div.appendChild(el);});}}
+        function addStickerToCanvas(e){const c=document.createElement('canvas');c.width=200;c.height=200;const x=c.getContext('2d');x.font="160px serif";x.textAlign="center";x.textBaseline="middle";x.fillText(e,100,110);const img=new Image();img.src=c.toDataURL();img.onload=()=>{config.slides[config.currentIdx].stickers.push({img,x:config.width/2,y:config.height/2,scale:1,size:200});saveState();draw();showToast("Стикер добавлен");};}
     </script>
 </body>
 </html>

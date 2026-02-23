@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AI Carousel Studio Ultimate v11.0 (Text Boundaries)</title>
+    <title>AI Carousel Studio Ultimate v11.5 (Highlighter)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     
@@ -156,7 +156,7 @@
         <main id="mainArea" class="relative flex items-center justify-center p-4 md:p-8 bg-slate-950 overflow-hidden w-full h-full">
             <canvas id="mainCanvas"></canvas>
             <div class="absolute bottom-4 text-slate-500 text-[10px] font-mono pointer-events-none opacity-50">
-                <span class="text-orange-400">Smart Design AI</span> v11.0
+                <span class="text-orange-400">Smart Design AI</span> v11.5
             </div>
         </main>
 
@@ -195,12 +195,17 @@
                         
                         <!-- Main Text Settings Panel -->
                         <div id="settings-main" class="text-settings-panel">
+                             <div class="text-[9px] text-slate-400 mb-2 p-1 bg-slate-900 rounded border border-slate-700">Используйте <b>{текст}</b> для выделения цветом</div>
                              <div class="flex items-center gap-2 mb-2">
                                 <span class="text-[9px] text-slate-500 w-16">Ширина:</span>
                                 <input type="range" id="textMaxWidth" min="100" max="1000" value="800" class="w-full h-2" oninput="saveAndRender()" onchange="saveState()">
                             </div>
+                            <div class="flex items-center gap-2 mb-2">
+                                <span class="text-[9px] text-slate-500 w-16">Цвет { }:</span>
+                                <input type="color" id="mainHighlightColor" oninput="saveAndRender()" onchange="saveState()" class="w-full h-6 bg-transparent border-none">
+                            </div>
                             <div class="flex items-center justify-between mb-2 border-t border-slate-700 pt-2">
-                                <span class="text-[10px] text-slate-400">Стиль фона</span>
+                                <span class="text-[10px] text-slate-400">Стиль блока</span>
                                 <input type="checkbox" id="mainBgShow" onchange="saveAndRender(); saveState()" class="accent-orange-500">
                             </div>
                             <div class="flex flex-col gap-2">
@@ -238,12 +243,17 @@
                         </div>
                         
                         <div id="settings-sub" class="text-settings-panel">
+                            <div class="text-[9px] text-slate-400 mb-2 p-1 bg-slate-900 rounded border border-slate-700">Используйте <b>{текст}</b> для выделения цветом</div>
                              <div class="flex items-center gap-2 mb-2">
                                 <span class="text-[9px] text-slate-500 w-16">Ширина:</span>
                                 <input type="range" id="subMaxWidth" min="100" max="1000" value="800" class="w-full h-2" oninput="saveAndRender()" onchange="saveState()">
                             </div>
+                            <div class="flex items-center gap-2 mb-2">
+                                <span class="text-[9px] text-slate-500 w-16">Цвет { }:</span>
+                                <input type="color" id="subHighlightColor" oninput="saveAndRender()" onchange="saveState()" class="w-full h-6 bg-transparent border-none">
+                            </div>
                             <div class="flex items-center justify-between mb-2 border-t border-slate-700 pt-2">
-                                <span class="text-[10px] text-slate-400">Стиль фона</span>
+                                <span class="text-[10px] text-slate-400">Стиль блока</span>
                                 <input type="checkbox" id="subBgShow" onchange="saveAndRender(); saveState()" class="accent-orange-500">
                             </div>
                             <div class="flex flex-col gap-2">
@@ -281,12 +291,17 @@
                         </div>
 
                         <div id="settings-body" class="text-settings-panel">
+                            <div class="text-[9px] text-slate-400 mb-2 p-1 bg-slate-900 rounded border border-slate-700">Используйте <b>{текст}</b> для выделения цветом</div>
                              <div class="flex items-center gap-2 mb-2">
                                 <span class="text-[9px] text-slate-500 w-16">Ширина:</span>
                                 <input type="range" id="bodyMaxWidth" min="100" max="1000" value="800" class="w-full h-2" oninput="saveAndRender()" onchange="saveState()">
                             </div>
+                            <div class="flex items-center gap-2 mb-2">
+                                <span class="text-[9px] text-slate-500 w-16">Цвет { }:</span>
+                                <input type="color" id="bodyHighlightColor" oninput="saveAndRender()" onchange="saveState()" class="w-full h-6 bg-transparent border-none">
+                            </div>
                             <div class="flex items-center justify-between mb-2 border-t border-slate-700 pt-2">
-                                <span class="text-[10px] text-slate-400">Стиль фона</span>
+                                <span class="text-[10px] text-slate-400">Стиль блока</span>
                                 <input type="checkbox" id="bodyBgShow" onchange="saveAndRender(); saveState()" class="accent-orange-500">
                             </div>
                             <div class="flex flex-col gap-2">
@@ -421,7 +436,7 @@
         window.onload = () => {
             populateFontSelectors();
             loadBgPresets();
-            if (localStorage.getItem('carousel_project_v11')) {
+            if (localStorage.getItem('carousel_project_v11_5')) {
                 loadProjectFromStorage();
             } else {
                 addSlide(false); 
@@ -454,14 +469,14 @@
                 bgType: 'color', bgVal: '#1e293b', bgImg: null, bgPos: {x: 0, y: 0},
                 
                 // Text Objects with Enhanced Backgrounds AND Width
-                text: "ЗАГОЛОВОК", fontMain: "Montserrat", colorMain: "#ffffff", fontSize: 100, textPos: { x: cx, y: cy - 200 },
-                textBg: { show: false, color: '#000000', type: 'fill', padding: 20 }, textMaxWidth: 800,
+                text: "ЗАГОЛОВОК {тут}", fontMain: "Montserrat", colorMain: "#ffffff", fontSize: 100, textPos: { x: cx, y: cy - 200 },
+                textBg: { show: false, color: '#000000', type: 'fill', padding: 20 }, textMaxWidth: 800, textHighlightColor: '#2dd4bf',
                 
                 sub: "ПОДЗАГОЛОВОК", fontSub: "Inter", colorSub: "#cbd5e1", subSize: 40, subPos: { x: cx, y: cy - 100 },
-                subBg: { show: false, color: '#000000', type: 'fill', padding: 10 }, subMaxWidth: 800,
+                subBg: { show: false, color: '#000000', type: 'fill', padding: 10 }, subMaxWidth: 800, subHighlightColor: '#2dd4bf',
                 
-                body: "Здесь находится ваш основной текст. Он может быть длинным и автоматически переноситься.", fontBody: "Open Sans", colorBody: "#94a3b8", bodySize: 30, bodyPos: { x: cx, y: cy + 50 },
-                bodyBg: { show: false, color: '#000000', type: 'fill', padding: 10 }, bodyMaxWidth: 800,
+                body: "Здесь находится ваш {основной текст}. Он может быть длинным и автоматически переноситься.", fontBody: "Open Sans", colorBody: "#94a3b8", bodySize: 30, bodyPos: { x: cx, y: cy + 50 },
+                bodyBg: { show: false, color: '#000000', type: 'fill', padding: 10 }, bodyMaxWidth: 800, bodyHighlightColor: '#2dd4bf',
 
                 logos: [], stickers: [],
                 chart: { visible: false, type: 'bar', labels: "Q1, Q2, Q3, Q4", data: "25, 60, 45, 80", colors: "#ea580c", scale: 1, pos: { x: cx, y: config.height - 250 } }
@@ -587,9 +602,10 @@
             
             if (s.chart.visible) drawInfographic(s.chart);
             
-            drawTextBlock(s.text, s.textPos, s.fontSize, s.fontMain, s.colorMain, '900', 'text', s.textBg, s.textMaxWidth);
-            drawTextBlock(s.sub, s.subPos, s.subSize, s.fontSub, s.colorSub, '600', 'sub', s.subBg, s.subMaxWidth);
-            drawBodyText(s.body, s.bodyPos, s.bodySize, s.fontBody, s.colorBody, '400', 'body', s.bodyBg, s.bodyMaxWidth);
+            // Draw blocks using the new Rich Text function
+            drawRichText(ctx, s.text, s.textPos, s.fontSize, s.fontMain, s.colorMain, '900', 'text', s.textBg, s.textMaxWidth, s.textHighlightColor, true);
+            drawRichText(ctx, s.sub, s.subPos, s.subSize, s.fontSub, s.colorSub, '600', 'sub', s.subBg, s.subMaxWidth, s.subHighlightColor, false);
+            drawRichText(ctx, s.body, s.bodyPos, s.bodySize, s.fontBody, s.colorBody, '400', 'body', s.bodyBg, s.bodyMaxWidth, s.bodyHighlightColor, false);
             
             s.logos.forEach((l, i) => { if(l.img) { const w = 150 * l.scale; const h = w * (l.img.height / l.img.width); ctx.drawImage(l.img, l.x - w/2, l.y - h/2, w, h); if(config.selected === `logo-${i}`) drawSelectionBox(l.x, l.y, w, h); }});
             s.stickers.forEach((st, i) => { const size = (st.size || 200) * (st.scale || 1); ctx.drawImage(st.img, st.x - size/2, st.y - size/2, size, size); if(config.selected === `sticker-${i}`) drawSelectionBox(st.x, st.y, size, size); });
@@ -606,7 +622,126 @@
             ctx.restore();
         }
 
-        // --- ENHANCED Text Drawing with Wrap & Width ---
+        // --- ENHANCED Text Drawing with Wrap & Highlights ---
+        
+        function parseAndWrapRichText(ctx, text, maxWidth, forceUpperCase) {
+            // 1. Parse into tokens: {text, highlight: bool}
+            // Split by { } pairs.
+            const parts = text.split(/(\{.*?\})/g);
+            let tokens = [];
+            
+            parts.forEach(part => {
+                if(!part) return;
+                const isHighlight = part.startsWith('{') && part.endsWith('}');
+                let content = isHighlight ? part.slice(1, -1) : part;
+                if(forceUpperCase) content = content.toUpperCase();
+                
+                // Now split content into words, preserving spaces
+                const words = content.split(/(\s+)/);
+                words.forEach(w => {
+                    if(w) tokens.push({ text: w, highlight: isHighlight, width: ctx.measureText(w).width });
+                });
+            });
+
+            // 2. Wrap into lines
+            let lines = [];
+            let currentLine = { width: 0, segments: [] };
+            
+            tokens.forEach(token => {
+                // If token is a newline (not implemented yet, but good to know) or space
+                if (currentLine.width + token.width > maxWidth && currentLine.width > 0 && token.text.trim().length > 0) {
+                    // Push current line and start new
+                    lines.push(currentLine);
+                    currentLine = { width: 0, segments: [] };
+                    // If the token causing break is a space, we can sometimes ignore it at start of new line, 
+                    // but simple logic: just add it.
+                    if (token.text.trim() === '') return; // skip leading space on new line
+                }
+                currentLine.segments.push(token);
+                currentLine.width += token.width;
+            });
+            if(currentLine.segments.length > 0) lines.push(currentLine);
+            return lines;
+        }
+
+        function drawRichText(ctx, txt, pos, size, font, color, weight, id, bgConfig, maxWidth, highlightColor, forceUpperCase) {
+            if(!txt) return;
+            ctx.save();
+            ctx.font = `${weight} ${size}px "${font}"`;
+            
+            const lineHeight = size * (id === 'body' ? 1.4 : 1.1);
+            const lines = parseAndWrapRichText(ctx, txt, maxWidth || 800, forceUpperCase);
+            const totalHeight = lines.length * lineHeight;
+            
+            // Calculate actual max width for global background
+            let actualBlockWidth = 0;
+            lines.forEach(l => { if(l.width > actualBlockWidth) actualBlockWidth = l.width; });
+
+            // Draw Global Background (Block level)
+            if (bgConfig && bgConfig.show) {
+                // For global background, we pass standard center pos and dims
+                drawTextBackground(ctx, pos.x, pos.y, actualBlockWidth, totalHeight, bgConfig);
+            }
+
+            // Draw Lines
+            const startY = pos.y - (totalHeight / 2) + (lineHeight / 2); // vertical center base
+            
+            lines.forEach((line, i) => {
+                const lineY = startY + i * lineHeight;
+                // Center align the line
+                let currentX = pos.x - (line.width / 2);
+                
+                line.segments.forEach(seg => {
+                    if (seg.highlight) {
+                        ctx.save();
+                        ctx.fillStyle = highlightColor || '#2dd4bf';
+                        // Draw highlight rect behind text
+                        // Add padding
+                        const hp = size * 0.1; 
+                        // Adjust Y slightly for visual centering of highlight
+                        const hy = id === 'body' ? lineY - size*0.5 : lineY - size * 0.5;
+                        const hh = size * (id === 'body' ? 1.1 : 1.0);
+                        
+                        ctx.fillRect(currentX - hp/2, hy, seg.width + hp, hh);
+                        ctx.restore();
+                    }
+                    
+                    ctx.fillStyle = color;
+                    ctx.textBaseline = 'middle'; 
+                    ctx.textAlign = 'left';
+                    
+                    // Shadow only on text
+                    ctx.shadowColor = 'rgba(0,0,0,0.3)'; ctx.shadowBlur = 4;
+                    
+                    // Specific adjustment for body text baseline if needed, but middle works well with calculated Y
+                    ctx.fillText(seg.text, currentX, lineY);
+                    
+                    currentX += seg.width;
+                });
+            });
+
+            // Draw Selection/Guide Box
+            const isActive = config.drag.target === id || (document.getElementById(`settings-${id}`) && document.getElementById(`settings-${id}`).classList.contains('open'));
+            if(isActive) { 
+                ctx.restore(); // restore to clean state for bounds
+                ctx.save();
+                ctx.scale(1,1); // already scaled in draw() but being safe
+                
+                // Bounds
+                ctx.strokeStyle = '#06b6d4'; ctx.lineWidth = 2; ctx.setLineDash([5,5]);
+                // Re-calculate bounds in visual space
+                const bx = pos.x - maxWidth/2;
+                const by = pos.y - totalHeight/2 - 20;
+                ctx.strokeRect(bx, by, maxWidth, totalHeight + 40);
+                
+                // Selection Box around content
+                ctx.setLineDash([]);
+                ctx.strokeStyle = '#ea580c'; ctx.lineWidth = 1; 
+                ctx.strokeRect(pos.x - actualBlockWidth/2 - 10, pos.y - totalHeight/2 - 10, actualBlockWidth+20, totalHeight+20); 
+            }
+            ctx.restore();
+        }
+
         function drawTextBackground(ctx, x, y, w, h, bgConfig) {
             if (!bgConfig || !bgConfig.show) return;
             ctx.save();
@@ -647,88 +782,6 @@
                 else ctx.fill();
             }
             ctx.restore();
-        }
-
-        // Now uses wrapText for ALL text blocks (titles included)
-        function drawTextBlock(txt, pos, size, font, color, weight, id, bgConfig, maxWidth) {
-            if(!txt) return; 
-            ctx.save(); 
-            ctx.font = `${weight} ${size}px "${font}"`; 
-            
-            const lines = wrapText(ctx, txt, maxWidth || 800);
-            const lineHeight = size * 1.1;
-            const totalHeight = lines.length * lineHeight;
-            
-            // Calc max width of actual lines for bg box
-            let actualW = 0;
-            lines.forEach(l => { const w = ctx.measureText(l).width; if(w > actualW) actualW = w; });
-            
-            drawTextBackground(ctx, pos.x, pos.y, actualW, totalHeight, bgConfig);
-
-            ctx.textAlign = 'center'; 
-            ctx.textBaseline = 'middle'; 
-            ctx.fillStyle = color; 
-            ctx.shadowColor = 'rgba(0,0,0,0.5)'; ctx.shadowBlur = 10;
-            
-            const startY = pos.y - (totalHeight/2) + (lineHeight/2);
-            lines.forEach((l, i) => {
-                 ctx.fillText(l.toUpperCase(), pos.x, startY + i * lineHeight);
-            });
-            
-            // Draw Bounds Guide
-            const isActive = config.drag.target === id || (document.getElementById(`settings-${id}`) && document.getElementById(`settings-${id}`).classList.contains('open'));
-            if(isActive) { 
-                ctx.strokeStyle = '#06b6d4'; ctx.lineWidth = 2; ctx.setLineDash([5,5]);
-                ctx.strokeRect(pos.x - maxWidth/2, pos.y - totalHeight/2 - 20, maxWidth, totalHeight + 40);
-                ctx.setLineDash([]);
-                // Selection box around content
-                ctx.strokeStyle = '#ea580c'; ctx.lineWidth = 1; 
-                ctx.strokeRect(pos.x - actualW/2 - 10, pos.y - totalHeight/2 - 10, actualW+20, totalHeight+20); 
-            } 
-            ctx.restore();
-        }
-
-        function drawBodyText(txt, pos, size, font, color, weight, id, bgConfig, maxWidth) {
-            if(!txt) return;
-            ctx.save();
-            ctx.font = `${weight} ${size}px "${font}"`;
-            
-            const lines = wrapText(ctx, txt, maxWidth || 800);
-            const lineHeight = size * 1.4;
-            const totalHeight = lines.length * lineHeight;
-            let startY = pos.y - totalHeight / 2;
-
-            let actualW = 0;
-            lines.forEach(l => { const mw = ctx.measureText(l).width; if(mw > actualW) actualW = mw; });
-            
-            if (bgConfig && bgConfig.show) {
-                drawTextBackground(ctx, pos.x, pos.y, actualW, totalHeight, bgConfig);
-            }
-
-            ctx.fillStyle = color;
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'top'; 
-            ctx.shadowColor = 'rgba(0,0,0,0.3)'; ctx.shadowBlur = 4;
-            
-            lines.forEach((line, i) => ctx.fillText(line, pos.x, startY + i * lineHeight));
-            
-            const isActive = config.drag.target === id || (document.getElementById(`settings-${id}`) && document.getElementById(`settings-${id}`).classList.contains('open'));
-            if(isActive) { 
-                // Bounds
-                ctx.strokeStyle = '#06b6d4'; ctx.lineWidth = 2; ctx.setLineDash([5,5]);
-                ctx.strokeRect(pos.x - maxWidth/2, startY - 20, maxWidth, totalHeight + 40);
-                ctx.setLineDash([]);
-                // Selection
-                ctx.strokeStyle = '#ea580c'; ctx.lineWidth = 1; 
-                ctx.strokeRect(pos.x - maxWidth/2 - 10, startY - 10, maxWidth + 20, totalHeight + 20); 
-            }
-            ctx.restore();
-        }
-
-        function wrapText(ctx, text, maxWidth) {
-            const words = text.split(' '); let lines = []; let currentLine = words[0];
-            for (let i = 1; i < words.length; i++) { let word = words[i]; let width = ctx.measureText(currentLine + " " + word).width; if (width < maxWidth) { currentLine += " " + word; } else { lines.push(currentLine); currentLine = word; } }
-            lines.push(currentLine); return lines;
         }
 
         function drawFrame() {
@@ -773,9 +826,9 @@
             s.sub = document.getElementById('subInput').value; s.subSize = parseInt(document.getElementById('subSizeSlider').value); s.fontSub = document.getElementById('fontSelectSub').value;
             s.body = document.getElementById('bodyInput').value; s.bodySize = parseInt(document.getElementById('bodySizeSlider').value); s.fontBody = document.getElementById('fontSelectBody').value;
             
-            s.textBg.show = document.getElementById('mainBgShow').checked; s.textBg.type = document.getElementById('mainBgType').value; s.textBg.color = document.getElementById('mainBgColor').value; s.textBg.padding = document.getElementById('mainBgPadding').value; s.textMaxWidth = parseInt(document.getElementById('textMaxWidth').value);
-            s.subBg.show = document.getElementById('subBgShow').checked; s.subBg.type = document.getElementById('subBgType').value; s.subBg.color = document.getElementById('subBgColor').value; s.subBg.padding = document.getElementById('subBgPadding').value; s.subMaxWidth = parseInt(document.getElementById('subMaxWidth').value);
-            s.bodyBg.show = document.getElementById('bodyBgShow').checked; s.bodyBg.type = document.getElementById('bodyBgType').value; s.bodyBg.color = document.getElementById('bodyBgColor').value; s.bodyBg.padding = document.getElementById('bodyBgPadding').value; s.bodyMaxWidth = parseInt(document.getElementById('bodyMaxWidth').value);
+            s.textBg.show = document.getElementById('mainBgShow').checked; s.textBg.type = document.getElementById('mainBgType').value; s.textBg.color = document.getElementById('mainBgColor').value; s.textBg.padding = document.getElementById('mainBgPadding').value; s.textMaxWidth = parseInt(document.getElementById('textMaxWidth').value); s.textHighlightColor = document.getElementById('mainHighlightColor').value;
+            s.subBg.show = document.getElementById('subBgShow').checked; s.subBg.type = document.getElementById('subBgType').value; s.subBg.color = document.getElementById('subBgColor').value; s.subBg.padding = document.getElementById('subBgPadding').value; s.subMaxWidth = parseInt(document.getElementById('subMaxWidth').value); s.subHighlightColor = document.getElementById('subHighlightColor').value;
+            s.bodyBg.show = document.getElementById('bodyBgShow').checked; s.bodyBg.type = document.getElementById('bodyBgType').value; s.bodyBg.color = document.getElementById('bodyBgColor').value; s.bodyBg.padding = document.getElementById('bodyBgPadding').value; s.bodyMaxWidth = parseInt(document.getElementById('bodyMaxWidth').value); s.bodyHighlightColor = document.getElementById('bodyHighlightColor').value;
 
             s.chart.visible = document.getElementById('showChart').checked; s.chart.type = document.getElementById('chartType').value; s.chart.labels = document.getElementById('chartLabels').value; s.chart.data = document.getElementById('chartData').value; s.chart.scale = parseInt(document.getElementById('chartScale').value) / 100;
             config.frame.type = document.getElementById('frameType').value; config.frame.padding = document.getElementById('framePadding').value; config.frame.color = document.getElementById('frameColor').value; config.frame.thickness = document.getElementById('frameThickness').value; config.frame.radius = document.getElementById('frameRadius').value;
@@ -789,13 +842,13 @@
             document.getElementById('bodyInput').value=s.body; document.getElementById('bodySizeSlider').value=s.bodySize; document.getElementById('bodyColor').value=s.colorBody; document.getElementById('fontSelectBody').value=s.fontBody;
             
             if(!s.textBg) s.textBg = {show:false, color:'#000000', type:'fill', padding:20};
-            document.getElementById('mainBgShow').checked = s.textBg.show; document.getElementById('mainBgType').value = s.textBg.type; document.getElementById('mainBgColor').value = s.textBg.color; document.getElementById('mainBgPadding').value = s.textBg.padding || 20; document.getElementById('textMaxWidth').value = s.textMaxWidth || 800;
+            document.getElementById('mainBgShow').checked = s.textBg.show; document.getElementById('mainBgType').value = s.textBg.type; document.getElementById('mainBgColor').value = s.textBg.color; document.getElementById('mainBgPadding').value = s.textBg.padding || 20; document.getElementById('textMaxWidth').value = s.textMaxWidth || 800; document.getElementById('mainHighlightColor').value = s.textHighlightColor || '#2dd4bf';
             
             if(!s.subBg) s.subBg = {show:false, color:'#000000', type:'fill', padding:10};
-            document.getElementById('subBgShow').checked = s.subBg.show; document.getElementById('subBgType').value = s.subBg.type; document.getElementById('subBgColor').value = s.subBg.color; document.getElementById('subBgPadding').value = s.subBg.padding || 10; document.getElementById('subMaxWidth').value = s.subMaxWidth || 800;
+            document.getElementById('subBgShow').checked = s.subBg.show; document.getElementById('subBgType').value = s.subBg.type; document.getElementById('subBgColor').value = s.subBg.color; document.getElementById('subBgPadding').value = s.subBg.padding || 10; document.getElementById('subMaxWidth').value = s.subMaxWidth || 800; document.getElementById('subHighlightColor').value = s.subHighlightColor || '#2dd4bf';
             
             if(!s.bodyBg) s.bodyBg = {show:false, color:'#000000', type:'fill', padding:10};
-            document.getElementById('bodyBgShow').checked = s.bodyBg.show; document.getElementById('bodyBgType').value = s.bodyBg.type; document.getElementById('bodyBgColor').value = s.bodyBg.color; document.getElementById('bodyBgPadding').value = s.bodyBg.padding || 10; document.getElementById('bodyMaxWidth').value = s.bodyMaxWidth || 800;
+            document.getElementById('bodyBgShow').checked = s.bodyBg.show; document.getElementById('bodyBgType').value = s.bodyBg.type; document.getElementById('bodyBgColor').value = s.bodyBg.color; document.getElementById('bodyBgPadding').value = s.bodyBg.padding || 10; document.getElementById('bodyMaxWidth').value = s.bodyMaxWidth || 800; document.getElementById('bodyHighlightColor').value = s.bodyHighlightColor || '#2dd4bf';
 
             document.getElementById('showChart').checked=s.chart.visible; document.getElementById('chartType').value=s.chart.type; document.getElementById('chartLabels').value=s.chart.labels; document.getElementById('chartData').value=s.chart.data; document.getElementById('chartScale').value=s.chart.scale*100;
             document.getElementById('frameType').value=config.frame.type; document.getElementById('framePadding').value=config.frame.padding; document.getElementById('frameColor').value=config.frame.color; document.getElementById('frameThickness').value=config.frame.thickness; document.getElementById('frameRadius').value=config.frame.radius;
@@ -847,8 +900,8 @@
             }, 100);
         }
 
-        function saveProjectToStorage(){localStorage.setItem('carousel_project_v11', JSON.stringify({width:config.width, height:config.height, slides: config.slides.map(s => ({...s, bgImg:null, logos:[], stickers:[]}))})); showToast("Проект сохранен!");}
-        function loadProjectFromStorage(){try{const d=JSON.parse(localStorage.getItem('carousel_project_v11'));config.width=d.width;config.height=d.height;config.slides=d.slides;changeFormat('1:1');}catch(e){console.log(e);addSlide(false);}}
+        function saveProjectToStorage(){localStorage.setItem('carousel_project_v11_5', JSON.stringify({width:config.width, height:config.height, slides: config.slides.map(s => ({...s, bgImg:null, logos:[], stickers:[]}))})); showToast("Проект сохранен!");}
+        function loadProjectFromStorage(){try{const d=JSON.parse(localStorage.getItem('carousel_project_v11_5'));config.width=d.width;config.height=d.height;config.slides=d.slides;changeFormat('1:1');}catch(e){console.log(e);addSlide(false);}}
         function showToast(m){const t=document.getElementById("toast");t.innerText=m;t.className="show";setTimeout(()=>t.className="",3000);}
         function handleBgUpload(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=(ev)=>{const i=new Image();i.onload=()=>{config.slides[config.currentIdx].bgImg=i;document.getElementById('saveBgBtn').classList.remove('hidden');saveState();draw();};i.src=ev.target.result;};r.readAsDataURL(f);}
         function handleLogoUpload(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=(ev)=>{const i=new Image();i.onload=()=>{config.slides[config.currentIdx].logos.push({img:i,x:config.width/2,y:config.height/2,scale:1});saveState();draw();};i.src=ev.target.result;};r.readAsDataURL(f);}

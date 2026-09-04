@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Галерея | Dmitriy Gavrilenko</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    
+    <style>
+        /* Стили специально для сетки галереи (чтобы не менять основной style.css) */
+        .photo-gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            padding: 20px 5%;
+            max-width: 1200px;
+            margin: 0 auto 100px auto;
+        }
+        .photo-frame {
+            background: #111; /* Цвет рамки */
+            padding: 10px;    /* Толщина рамки */
+            border-radius: 8px;
+            border: 1px solid #333;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+            transition: transform 0.3s ease, border-color 0.3s ease;
+        }
+        .photo-frame:hover {
+            transform: translateY(-5px);
+            border-color: #00c6ff;
+        }
+        .photo-frame img {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="cursor" id="cursor"></div>
+
+    <nav>
+        <a href="index.html" class="logo-container hover-target">
+            <img src="logo.png" alt="DG Logo">
+        </a>
+        <div class="nav-links">
+            <a href="index.html" class="nav-link hover-target">Главная</a>
+            <a href="projects.html" class="nav-link hover-target">Все проекты</a>
+            <a href="interviews.html" class="nav-link hover-target">Интервью</a>
+            <a href="#footer" class="nav-link hover-target">Контакты</a>
+        </div>
+    </nav>
+
+    <div style="height: 120px;"></div>
+
+    <h1 class="projects-main-header zoom-effect hover-target" style="text-align: center;">ГАЛЕРЕЯ</h1>
+
+    <!-- Сетка с фотографиями -->
+    <div class="photo-gallery-grid">
+        <!-- Фото 1 -->
+        <div class="photo-frame hover-target">
+            <!-- Класс gallery-img должен активировать ваш lightbox из script.js -->
+            <img src="gallery1.jpg" class="gallery-img" alt="Фото 1">
+        </div>
+        <!-- Фото 2 -->
+        <div class="photo-frame hover-target">
+            <img src="gallery2.jpg" class="gallery-img" alt="Фото 2">
+        </div>
+        <!-- Фото 3 -->
+        <div class="photo-frame hover-target">
+            <img src="gallery3.jpg" class="gallery-img" alt="Фото 3">
+        </div>
+        <!-- Фото 4 -->
+        <div class="photo-frame hover-target">
+            <img src="gallery4.jpg" class="gallery-img" alt="Фото 4">
+        </div>
+        <!-- Добавляйте новые блоки <div class="photo-frame">...</div> по аналогии -->
+    </div>
+
+    <footer id="footer">
+        <a href="https://t.me/Dmitry_Gavrilenko" target="_blank" class="footer-cta hover-target">ДАВАЙ ДВИГАТЬСЯ<br>ВМЕСТЕ</a>
+        <div class="social-links">
+            <a href="https://t.me/GavrilenkoDmitry" class="social-icon hover-target" target="_blank"><i class="fab fa-telegram"></i></a>
+            <a href="https://vk.com/dmitriy1gavrilenko" class="social-icon hover-target" target="_blank"><i class="fab fa-vk"></i></a>
+        </div>
+        <a href="https://t.me/GavrilenkoDmitry" class="footer-btn hover-target" target="_blank">Обсудить</a>
+        <div class="copyright">
+            &copy; 2026 <a href="https://by-alex.ru/" target="_blank" class="hover-target" style="color: #00c6ff; text-decoration: none; font-weight: 700;">by AL☰X</a><br>Все права защищены.
+        </div>
+    </footer>
+
+    <!-- Модальное окно для увеличения фото (из вашего проекта) -->
+    <div id="lightbox-modal" class="lightbox-modal">
+        <span class="close-btn" id="lightbox-close">&times;</span>
+        <div class="prev-btn" id="lightbox-prev">&#10094;</div>
+        <img class="lightbox-content" id="lightbox-img" src="">
+        <div class="next-btn" id="lightbox-next">&#10095;</div>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>
